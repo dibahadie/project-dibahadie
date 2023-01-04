@@ -21,6 +21,7 @@ int create_dir(char *path){
 }
 
 int create_file(char *path){
+    path = path + 1;
     if(strchr(path, '/') == NULL){
         struct stat buff;
         if(stat(path, &buff) == -1){
@@ -43,5 +44,5 @@ int create_file(char *path){
 }
 
 int main(){
-
+    mkdir("root", 0777);
 }
