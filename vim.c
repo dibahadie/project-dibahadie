@@ -21,9 +21,10 @@ int main(){
 }
 
 int create_dir(char *path){
-    char *remained_path = path;
+    char *remained_path;
     char *last_dir = NULL;
 
+    last_dir = (char*) malloc(sizeof(path));
     remained_path = (char*) malloc(sizeof(path));
     last_dir = strrchr(path, '/');
     if(last_dir == NULL) {
@@ -32,12 +33,19 @@ int create_dir(char *path){
     }
     strncpy(remained_path, path, strlen(path) - strlen(last_dir));
     int result = create_dir(remained_path);
-    if(*(remained_path) == '/') mkdir(path + 1 ,0777);
+    if(*(path) == '/') mkdir(path + 1 ,0777);
     else mkdir(path, 0777);
+    free(remained_path);
     return result;
 }
+
+
 int create_file(char *path){
-    path = path + 1;
+    if(*path == '\"'){
+        path = path + 2;
+        path[strlen(path) - 2] = '\0';
+    }
+    else path = path + 1;
     
     if(strchr(path, '/') == NULL){
         struct stat buff;
@@ -89,7 +97,6 @@ int get_command(){
     }
     return 0;
 }
-
 int gnc(char** command, char** next_command, char** remaining){
     *remaining = (char*) malloc(sizeof(*command));
     *next_command = (char*) malloc(sizeof(*command));
