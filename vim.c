@@ -10,7 +10,8 @@ int create_dir(char *path);
 int create_file(char *path);
 int get_command();
 int gnc(char** command, char** next_command, char** remaining);
-
+int get_input(char* command, char** filepath, char* next_identifier, char*pre_identifier);
+int cat(char* filepath);
 
 
 int main(){
@@ -39,7 +40,6 @@ int create_dir(char *path){
     return result;
 }
 
-
 int create_file(char *path){
     if(*path == '\"'){
         path = path + 2;
@@ -50,7 +50,7 @@ int create_file(char *path){
     if(strchr(path, '/') == NULL){
         struct stat buff;
         if(stat(path, &buff) == -1){
-            FILE *file = fopen(path, "w");
+            FILE *file = fopen(path, "a+");
             fclose(file);
             return 1;
         }else{
@@ -64,7 +64,7 @@ int create_file(char *path){
         strncpy(dirpath, path, strlen(path) - strlen(filename));
         create_dir(dirpath);
         if(stat(path, &buff) == -1){
-            FILE *file = fopen(path, "w");
+            FILE *file = fopen(path, "a+");
             if(file == NULL){
                 printf("File creation failed.\n");
                 return 1;
@@ -78,6 +78,7 @@ int create_file(char *path){
         return 0;
     }
 }
+
 int get_command(){
     char *input;
     input = (char*) malloc(sizeof(char) * MAX_SIZE);
@@ -94,9 +95,16 @@ int get_command(){
             create_file(filepath);
             return 1;
         }
+    }else if(!strcmp(initial_command, "cat")){
+        char *filepath;
+        if(!get_input(input, &filepath, "\n", "--file ")) return 0;
+        cat(filepath);
+        return 1;
     }
+
     return 0;
 }
+
 int gnc(char** command, char** next_command, char** remaining){
     *remaining = (char*) malloc(sizeof(*command));
     *next_command = (char*) malloc(sizeof(*command));
@@ -105,5 +113,36 @@ int gnc(char** command, char** next_command, char** remaining){
     *remaining = a;
     strncpy(*next_command, *command, strlen(*command) - strlen(*remaining));
     (*remaining) ++;
+    return 1;
+}
+
+int get_input(char* command, char** text, char* next_identifier, char*pre_identifier){
+    int len;
+    char *pre, *next;
+    pre = (char*) malloc(sizeof(command));
+    next = (char*) malloc(sizeof(command));
+    pre = strstr(command, pre_identifier);
+    if(pre == NULL) return 0;
+    pre = pre + strlen(pre_identifier);
+    next = strstr(command, next_identifier);
+    if(next == NULL) return 0;
+    *text = (char*) malloc((strlen(pre) - strlen(next) - 1) * sizeof(char));
+    strncpy(*text, pre, strlen(pre) - strlen(next));
+    return 1;
+}
+
+int cat(char* filepath){
+    if(*filepath == '/') filepath = filepath + 1;
+    FILE* file = fopen(filepath, "r");
+    if(file == NULL) {
+        printf("File can't be opened");
+        return 0;
+    }
+    char c = fgetc(file);
+    while(c != EOF){
+        printf("%c", c);
+        c = fgetc(file);
+    }
+    fclose(file);
     return 1;
 }
