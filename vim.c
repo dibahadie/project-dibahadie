@@ -193,6 +193,7 @@ int insert(char *filepath, char *str, int line_no, int start_pos){
         printf("The given file doesn't exist\n");
         return 0;
     }
+
     char c = fgetc(file);
     while(c != EOF && line_counter != (line_no - 1)){
         new_content[strlen(new_content)] = c;
