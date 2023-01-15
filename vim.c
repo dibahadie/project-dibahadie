@@ -15,6 +15,8 @@ int get_input(char* command, char** filepath, char* next_identifier, char*pre_id
 int cat(char* filepath);
 int insert(char *filepath, char *str, int line_no, int start_pos);
 void path_validation(char *path, char** second_path);
+void string_validation(char initial[]);
+int removef(char *filepath, int line_no, int start_pos, int size);
 
 
 int main(){
@@ -53,11 +55,10 @@ int create_file(char *path){
         path = path + 1;
         path[strlen(path) - 1] = '\0';
     }
-    
+    path[strlen(path) - 1] = '\0';
     if(strchr(path, '/') == NULL){
-        struct stat buff;
-        if(stat(path, &buff) == -1){
-            FILE *file = fopen(path, "a+");
+        FILE *file = fopen(path, "w");
+        if(file != NULL){
             fclose(file);
             return 1;
         }else{
@@ -70,8 +71,9 @@ int create_file(char *path){
         dirpath = (char*) malloc(sizeof(path));
         strncpy(dirpath, path, strlen(path) - strlen(filename));
         create_dir(dirpath);
-        if(stat(path, &buff) == -1){
-            FILE *file = fopen(path, "a+");
+        FILE *file = fopen(path, "r");
+        if(file == NULL){
+            file = fopen(path, "w");
             if(file == NULL){
                 printf("File creation failed.\n");
                 return 1;
@@ -102,12 +104,14 @@ int get_command(){
             create_file(filepath);
             return 1;
         }
-    }else if(!strcmp(initial_command, "cat")){
+    }
+    else if(!strcmp(initial_command, "cat")){
         char *filepath;
         if(!get_input(input, &filepath, "\n", "--file ")) return 0;
         cat(filepath);
         return 1;
-    }else if(!strcmp(initial_command, "insertstr")){
+    }
+    else if(!strcmp(initial_command, "insertstr")){
         char *filepath, *str, *str_line, *str_start;
         int line_no;
         int start_pos;
@@ -118,6 +122,21 @@ int get_command(){
         line_no = atoi(str_line);
         start_pos = atoi(str_start);
         insert(filepath, str, line_no, start_pos);
+        return 1;
+    }
+    else if(!strcmp(initial_command, "remove")){
+        char *filepath, *line_str, *start_str, *size_str;
+        int line_no, start_pos, size;
+        if(!get_input(input, &filepath, " --pos", "--file ")) return 0;
+        if(!get_input(input, &line_str, ":", "--pos ")) return 0;
+        if(!get_input(input, &start_str, " -size", ":")) return 0;
+        if(!get_input(input, &size_str, " -f\n", "-size ") && !get_input(input, &size_str, " -b\n", "-size ")) return 0;
+        char mode = input[strlen(input) - 2];
+        if(mode != 'f' && mode != 'b') return 0;
+        line_no = atoi(line_str);
+        start_pos = atoi(start_str);
+        size = atoi(size_str);
+        if(mode == 'f') removef(filepath, line_no, start_pos, size);
         return 1;
     }
 
@@ -145,6 +164,7 @@ int get_input(char* command, char** text, char* next_identifier, char*pre_identi
     pre = pre + strlen(pre_identifier);
     next = strstr(command, next_identifier);
     if(next == NULL) return 0;
+    if(next < pre) return 0;
     *text = (char*) malloc((strlen(pre) - strlen(next) - 1) * sizeof(char));
     strncpy(*text, pre, strlen(pre) - strlen(next));
     return 1;
@@ -175,13 +195,14 @@ int cat(char* filepath){
 }
 
 int insert(char *filepath, char *str, int line_no, int start_pos){
+    string_validation(str);
     char* new_content;
     new_content = (char*) malloc(sizeof(char) * MAX_FILE);
     int line_counter=0, index_counter = 0;
     if(*filepath == '/') filepath = filepath + 1;
     else if(*filepath == '\"' && *(filepath + 1) == '/'){
         filepath = filepath + 2;
-        filepath[strlen(filepath) - 2] = '\0';
+        filepath[strlen(filepath) - 1] = '\0';
     }
     else if(*filepath == '\"'){
         filepath = filepath + 1;
@@ -230,4 +251,73 @@ int insert(char *filepath, char *str, int line_no, int start_pos){
     fclose(file1);
     return 1;
 }
+
+void string_validation(char initial[]){
+    int size = strlen(initial);
+    if(initial[0] == '\"'){
+        for(int i=0; i<size; i++) initial[i] = initial[i+1];
+        initial[size - 2] = '\0';
+        size -= 2;
+    }
+    for(int i=0; i<size - 1; i++){
+        if(initial[i] == '\\' && initial[i+1] == 'n'){
+            if(i == 0 || initial[i-1] != '\\'){
+                for(int j=i; j<size; j++){
+                    initial[j] = initial[j+1];
+                }
+                size--;
+                initial[i] = '\n';
+            }
+        }
+        else if(initial[i] == '\\' && initial[i+1] == '\"'){
+            if(i == 0 || initial[i-1] != '\\'){
+                for(int j=i; j<size; j++){
+                    initial[j] = initial[j+1];
+                }
+                size--;
+                initial[i] = '\"';
+            }
+        }
+        else if(initial[i] == initial[i+1] && initial[i] == '\\'){
+            for(int j=i; j<size; j++){
+                initial[j] = initial[j+1];
+            }
+            size--;
+        }
+    }
+}
+
+int removef(char *filepath, int line_no, int start_pos, int size){
+    char* new_content;
+    new_content = (char*) malloc(sizeof(char) * MAX_FILE);
+    int line_counter = 0, index_counter = 0, del_counter = 0;
+    FILE *file = fopen(filepath, "r");
+    if(file == NULL) return 0;
+    char c = fgetc(file);
+    while(c != EOF && line_counter != (line_no - 1)){
+        new_content[strlen(new_content)] = c;
+        if(c == '\n') line_counter ++;
+        c = fgetc(file);
+    }
+    while(c != EOF && index_counter != (start_pos)){
+        new_content[strlen(new_content)] = c;
+        index_counter++;
+        c = fgetc(file);
+    }
+    while (del_counter < size){
+        c = fgetc(file);
+        del_counter++;
+    }
+    while(c != EOF){
+        new_content[strlen(new_content)] = c;
+        c = fgetc(file);
+    }
+    fclose(file);
+    FILE *file1 = fopen(filepath, "w");
+    fprintf(file1, "%s",new_content);
+    fclose(file1);
+    return 1;
+}
+
+
 
