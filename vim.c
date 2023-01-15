@@ -17,6 +17,7 @@ int insert(char *filepath, char *str, int line_no, int start_pos);
 void path_validation(char *path, char** second_path);
 void string_validation(char initial[]);
 int removef(char *filepath, int line_no, int start_pos, int size);
+int removeb(char *filepath, int line_no, int start_pos, int size);
 
 
 int main(){
@@ -124,7 +125,7 @@ int get_command(){
         insert(filepath, str, line_no, start_pos);
         return 1;
     }
-    else if(!strcmp(initial_command, "remove")){
+    else if(!strcmp(initial_command, "removestr")){
         char *filepath, *line_str, *start_str, *size_str;
         int line_no, start_pos, size;
         if(!get_input(input, &filepath, " --pos", "--file ")) return 0;
@@ -137,6 +138,7 @@ int get_command(){
         start_pos = atoi(start_str);
         size = atoi(size_str);
         if(mode == 'f') removef(filepath, line_no, start_pos, size);
+        if(mode == 'b') removeb(filepath, line_no, start_pos, size);
         return 1;
     }
 
@@ -288,11 +290,67 @@ void string_validation(char initial[]){
 }
 
 int removef(char *filepath, int line_no, int start_pos, int size){
+    if(*filepath == '/') filepath = filepath + 1;
+    else if(*filepath == '\"' && *(filepath + 1) == '/'){
+        filepath = filepath + 2;
+        filepath[strlen(filepath) - 1] = '\0';
+    }
+    else if(*filepath == '\"'){
+        filepath = filepath + 1;
+        filepath[strlen(filepath) - 1] = '\0';
+    }
     char* new_content;
     new_content = (char*) malloc(sizeof(char) * MAX_FILE);
     int line_counter = 0, index_counter = 0, del_counter = 0;
     FILE *file = fopen(filepath, "r");
-    if(file == NULL) return 0;
+    if(file == NULL) {
+        printf("The given file doesn't exist\n");
+        return 0;
+    }
+    char c = fgetc(file);
+    while(c != EOF && line_counter != (line_no - 1)){
+        new_content[strlen(new_content)] = c;
+        if(c == '\n') line_counter ++;
+        c = fgetc(file);
+    }
+    while(c != EOF && index_counter != (start_pos + 1)){
+        new_content[strlen(new_content)] = c;
+        index_counter++;
+        c = fgetc(file);
+    }
+    while (del_counter < size){
+        c = fgetc(file);
+        del_counter++;
+    }
+    while(c != EOF){
+        new_content[strlen(new_content)] = c;
+        c = fgetc(file);
+    }
+    fclose(file);
+    FILE *file1 = fopen(filepath, "w");
+    fprintf(file1, "%s",new_content);
+    fclose(file1);
+    return 1;
+}
+
+int removeb(char *filepath, int line_no, int start_pos, int size){
+    if(*filepath == '/') filepath = filepath + 1;
+    else if(*filepath == '\"' && *(filepath + 1) == '/'){
+        filepath = filepath + 2;
+        filepath[strlen(filepath) - 1] = '\0';
+    }
+    else if(*filepath == '\"'){
+        filepath = filepath + 1;
+        filepath[strlen(filepath) - 1] = '\0';
+    }
+    char* new_content;
+    new_content = (char*) malloc(sizeof(char) * MAX_FILE);
+    int line_counter = 0, index_counter = 0, del_counter = 0;
+    FILE *file = fopen(filepath, "r");
+    if(file == NULL) {
+        printf("The given file doesn't exist\n");
+        return 0;
+    }
     char c = fgetc(file);
     while(c != EOF && line_counter != (line_no - 1)){
         new_content[strlen(new_content)] = c;
@@ -304,10 +362,11 @@ int removef(char *filepath, int line_no, int start_pos, int size){
         index_counter++;
         c = fgetc(file);
     }
-    while (del_counter < size){
-        c = fgetc(file);
-        del_counter++;
+    while(del_counter < size){
+        new_content[strlen(new_content) - 1] = '\0';
+        del_counter ++;
     }
+    printf("%s\n", new_content);
     while(c != EOF){
         new_content[strlen(new_content)] = c;
         c = fgetc(file);
