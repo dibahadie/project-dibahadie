@@ -18,6 +18,8 @@ void path_validation(char *path, char** second_path);
 void string_validation(char initial[]);
 int removef(char *filepath, int line_no, int start_pos, int size);
 int removeb(char *filepath, int line_no, int start_pos, int size);
+int find_first_index(char *filepath, char *str);
+int find_count(char *filepath, char *str);
 
 
 int main(){
@@ -140,8 +142,25 @@ int get_command(){
         if(mode == 'f') removef(filepath, line_no, start_pos, size);
         if(mode == 'b') removeb(filepath, line_no, start_pos, size);
         return 1;
+    }else if(!strcmp(initial_command, "find")){
+        char *filepath, *str;
+        if(!get_input(input, &str, " --file", "--str ")) return 0;
+        string_validation(str);
+        char *count_ptr = strstr(input, "-count");
+        char *all_ptr = strstr(input, "-at");
+        char *byword_ptr = strstr(input, "-byword");
+        if(count_ptr == NULL && all_ptr == NULL && byword_ptr == NULL){
+            if(!get_input(input, &filepath, "\n", "--file ")) return 0;
+            find_first_index(filepath, str);
+            return 1;
+        }
+        if(all_ptr == NULL && byword_ptr == NULL){
+            if(!get_input(input, &filepath, " -count", "--file ")) return 0;
+            printf("%s %s", filepath, str);
+            // find_count(filepath, str);
+            return 1;
+        }
     }
-
     return 0;
 }
 
@@ -378,5 +397,54 @@ int removeb(char *filepath, int line_no, int start_pos, int size){
     return 1;
 }
 
+int find_first_index(char *filepath, char *str){
+    FILE *file = fopen(filepath, "r");
+    if(file == NULL){
+        printf("The given file doesn't exist\n");
+        return 0;
+    }
+    char c = fgetc(file);
+    char *content;
+    content = (char*) malloc(sizeof(char) * MAX_FILE);
+    while ((c != EOF)){
+        content[strlen(content)] = c;
+        c = fgetc(file);
+    }
+    char *loc_ptr = strstr(content, str);
+    if(loc_ptr == NULL){
+        printf("Expression not found\n");
+        return 0;
+    }
+    int index = strlen(content) - strlen(loc_ptr);
+    printf("First occurrence : %d\n", index);
+    return 1;
+}
 
+int find_count(char *filepath, char *str){
+    int counter = 0;
+    FILE *file = fopen(filepath, "r");
+    if(file == NULL){
+        printf("The given file doesn't exist\n");
+        return 0;
+    }
+    char c = fgetc(file);
+    char *content, *buff;
+    buff = (char*) malloc(sizeof(str));
+    content = (char*) malloc(sizeof(char) * MAX_FILE);
+    while ((c != EOF)){
+        content[strlen(content)] = c;
+        c = fgetc(file);
+    }
+    char *loc_ptr = strstr(content, str);
+    if(loc_ptr == NULL){
+        printf("Expression not found\n");
+        return 0;
+    }
+    while(loc_ptr != NULL){
+        counter++;
+        loc_ptr = strstr(loc_ptr + 1, str);
+    }
+    printf("Number of occurrence : %d\n", counter);
+    return 1;
+}
 
