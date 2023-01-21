@@ -14,12 +14,13 @@ int gnc(char** command, char** next_command, char** remaining);
 int get_input(char* command, char** filepath, char* next_identifier, char*pre_identifier);
 int cat(char* filepath);
 int insert(char *filepath, char *str, int line_no, int start_pos);
-void path_validation(char *path, char** second_path);
+char* path_validation(char initial[]);
 void string_validation(char initial[]);
 int removef(char *filepath, int line_no, int start_pos, int size);
 int removeb(char *filepath, int line_no, int start_pos, int size);
 int find_first_index(char *filepath, char *str);
 int find_count(char *filepath, char *str);
+int find_at(char *filepath, char *str, int n);
 
 
 int main(){
@@ -27,6 +28,29 @@ int main(){
     while(1){
         if(!get_command()) printf("invalid command\n");
     }
+}
+
+char* path_validation(char initial[]){
+    char *path;
+    path = (char*) malloc(strlen(initial) * sizeof(char));
+    strcpy(path, initial);
+    int size = strlen(path);
+    if(path[0] == '/'){
+        path = path + 1;
+        size--;
+    }
+    else if(path[0] == '\"' && path[1] == '/'){
+        path = path + 2;
+        path[size - 3] = '\0';
+        size -= 2;
+    }
+    else if(path[0] == '\"'){
+        path = path + 1;
+        path[size - 2] = '\0';
+        size--;
+    }
+    if(path[size - 1] == '\n') path[size - 1] = '\0';
+    return path;
 }
 
 int create_dir(char *path){
@@ -49,16 +73,7 @@ int create_dir(char *path){
 }
 
 int create_file(char *path){
-    if(*path == '/') path = path + 1;
-    else if(*path == '\"' && *(path + 1) == '/'){
-        path = path + 2;
-        path[strlen(path) - 2] = '\0';
-    }
-    else if(*path == '\"'){
-        path = path + 1;
-        path[strlen(path) - 1] = '\0';
-    }
-    path[strlen(path) - 1] = '\0';
+    path = path_validation(path);
     if(strchr(path, '/') == NULL){
         FILE *file = fopen(path, "w");
         if(file != NULL){
@@ -101,12 +116,9 @@ int get_command(){
     if(!strcmp(initial_command, "createfile")){
         char* filepath;
         char* input_format;
-        if(gnc(&remaining, &input_format, &filepath) == 0) return 0;
-        if(strcmp(input_format, "--file")) return 0;
-        else{
-            create_file(filepath);
-            return 1;
-        }
+        if(!get_input(input, &filepath, "\n", "--file ")) return 0;
+        create_file(filepath);
+        return 1;
     }
     else if(!strcmp(initial_command, "cat")){
         char *filepath;
@@ -147,17 +159,26 @@ int get_command(){
         if(!get_input(input, &str, " --file", "--str ")) return 0;
         string_validation(str);
         char *count_ptr = strstr(input, "-count");
-        char *all_ptr = strstr(input, "-at");
+        char *all_ptr = strstr(input, "-all");
         char *byword_ptr = strstr(input, "-byword");
-        if(count_ptr == NULL && all_ptr == NULL && byword_ptr == NULL){
+        char *at_ptr = strstr(input, "-at");
+        if(count_ptr == NULL && all_ptr == NULL && byword_ptr == NULL && at_ptr == NULL){
             if(!get_input(input, &filepath, "\n", "--file ")) return 0;
-            find_first_index(filepath, str);
+            printf("%d\n", find_first_index(filepath, str));
             return 1;
         }
-        if(all_ptr == NULL && byword_ptr == NULL){
+        if(all_ptr == NULL && byword_ptr == NULL && at_ptr == NULL){
             if(!get_input(input, &filepath, " -count", "--file ")) return 0;
-            printf("%s %s", filepath, str);
-            // find_count(filepath, str);
+            printf("number of occurrence : %d\n", find_count(filepath, str));
+            return 1;
+        }
+        if(count_ptr == NULL && all_ptr == NULL && byword_ptr == NULL){
+            char *n_str;
+            int n;
+            if(!get_input(input, &filepath, " -at", "--file ")) return 0;
+            if(!get_input(input, &n_str, "\n", "-at ")) return 0;
+            n = atoi(n_str);
+            printf("%d\n", find_at(filepath, str, n));
             return 1;
         }
     }
@@ -192,15 +213,7 @@ int get_input(char* command, char** text, char* next_identifier, char*pre_identi
 }
 
 int cat(char* filepath){
-    if(*filepath == '/') filepath = filepath + 1;
-    else if(*filepath == '\"' && *(filepath + 1) == '/'){
-        filepath = filepath + 2;
-        filepath[strlen(filepath) - 1] = '\0';
-    }
-    else if(*filepath == '\"'){
-        filepath = filepath + 1;
-        filepath[strlen(filepath) - 1] = '\0';
-    }
+    filepath = path_validation(filepath);
     FILE* file = fopen(filepath, "r");
     if(file == NULL) {
         printf("File can't be opened\n");
@@ -220,15 +233,7 @@ int insert(char *filepath, char *str, int line_no, int start_pos){
     char* new_content;
     new_content = (char*) malloc(sizeof(char) * MAX_FILE);
     int line_counter=0, index_counter = 0;
-    if(*filepath == '/') filepath = filepath + 1;
-    else if(*filepath == '\"' && *(filepath + 1) == '/'){
-        filepath = filepath + 2;
-        filepath[strlen(filepath) - 1] = '\0';
-    }
-    else if(*filepath == '\"'){
-        filepath = filepath + 1;
-        filepath[strlen(filepath) - 1] = '\0';
-    }
+    filepath = path_validation(filepath);
 
     FILE *file = fopen(filepath, "r");
     if(file == NULL) {
@@ -309,15 +314,7 @@ void string_validation(char initial[]){
 }
 
 int removef(char *filepath, int line_no, int start_pos, int size){
-    if(*filepath == '/') filepath = filepath + 1;
-    else if(*filepath == '\"' && *(filepath + 1) == '/'){
-        filepath = filepath + 2;
-        filepath[strlen(filepath) - 1] = '\0';
-    }
-    else if(*filepath == '\"'){
-        filepath = filepath + 1;
-        filepath[strlen(filepath) - 1] = '\0';
-    }
+    filepath = path_validation(filepath);
     char* new_content;
     new_content = (char*) malloc(sizeof(char) * MAX_FILE);
     int line_counter = 0, index_counter = 0, del_counter = 0;
@@ -353,15 +350,7 @@ int removef(char *filepath, int line_no, int start_pos, int size){
 }
 
 int removeb(char *filepath, int line_no, int start_pos, int size){
-    if(*filepath == '/') filepath = filepath + 1;
-    else if(*filepath == '\"' && *(filepath + 1) == '/'){
-        filepath = filepath + 2;
-        filepath[strlen(filepath) - 1] = '\0';
-    }
-    else if(*filepath == '\"'){
-        filepath = filepath + 1;
-        filepath[strlen(filepath) - 1] = '\0';
-    }
+    filepath = path_validation(filepath);
     char* new_content;
     new_content = (char*) malloc(sizeof(char) * MAX_FILE);
     int line_counter = 0, index_counter = 0, del_counter = 0;
@@ -398,10 +387,11 @@ int removeb(char *filepath, int line_no, int start_pos, int size){
 }
 
 int find_first_index(char *filepath, char *str){
+    filepath = path_validation(filepath);
     FILE *file = fopen(filepath, "r");
     if(file == NULL){
         printf("The given file doesn't exist\n");
-        return 0;
+        return -1;
     }
     char c = fgetc(file);
     char *content;
@@ -413,19 +403,19 @@ int find_first_index(char *filepath, char *str){
     char *loc_ptr = strstr(content, str);
     if(loc_ptr == NULL){
         printf("Expression not found\n");
-        return 0;
+        return -1;
     }
     int index = strlen(content) - strlen(loc_ptr);
-    printf("First occurrence : %d\n", index);
-    return 1;
+    return index;
 }
 
 int find_count(char *filepath, char *str){
+    filepath = path_validation(filepath);
     int counter = 0;
     FILE *file = fopen(filepath, "r");
     if(file == NULL){
         printf("The given file doesn't exist\n");
-        return 0;
+        return -1;
     }
     char c = fgetc(file);
     char *content, *buff;
@@ -438,13 +428,40 @@ int find_count(char *filepath, char *str){
     char *loc_ptr = strstr(content, str);
     if(loc_ptr == NULL){
         printf("Expression not found\n");
-        return 0;
+        return -1;
     }
     while(loc_ptr != NULL){
         counter++;
         loc_ptr = strstr(loc_ptr + 1, str);
     }
-    printf("Number of occurrence : %d\n", counter);
-    return 1;
+    return counter;
+}
+
+int find_at(char *filepath, char *str, int n){
+    filepath = path_validation(filepath);
+    int counter = 1;
+    FILE *file = fopen(filepath, "r");
+    if(file == NULL){
+        return -2;
+    }
+    char c = fgetc(file);
+    char *content, *buff;
+    buff = (char*) malloc(sizeof(str));
+    content = (char*) malloc(sizeof(char) * MAX_FILE);
+    while ((c != EOF)){
+        content[strlen(content)] = c;
+        c = fgetc(file);
+    }
+    char *loc_ptr = strstr(content, str);
+    if(loc_ptr == NULL) return -1;
+    while(loc_ptr != NULL && counter != n){
+        counter++;
+        loc_ptr = strstr(loc_ptr + 1, str);
+    }
+    if(counter != n) return -1;
+    else{
+        int index = strlen(content) - strlen(loc_ptr);
+        return index;
+    }
 }
 
