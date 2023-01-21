@@ -21,6 +21,7 @@ int removeb(char *filepath, int line_no, int start_pos, int size);
 int find_first_index(char *filepath, char *str);
 int find_count(char *filepath, char *str);
 int find_at(char *filepath, char *str, int n);
+int auto_indent(char *filepath);
 
 
 int main(){
@@ -181,6 +182,12 @@ int get_command(){
             printf("%d\n", find_at(filepath, str, n));
             return 1;
         }
+    }
+    else if(!strcmp(initial_command, "auto-indent")){
+        char *filepath;
+        if(!get_input(input, &filepath, "\n", "--file ")) return 0;
+        auto_indent(filepath);
+        return 1;
     }
     return 0;
 }
@@ -465,3 +472,85 @@ int find_at(char *filepath, char *str, int n){
     }
 }
 
+int auto_indent(char *filepath){
+    filepath = path_validation(filepath);
+    int tab_counter = 0;
+    FILE *file = fopen(filepath, "r");
+    char *content;
+    content = (char*) malloc(sizeof(char) * MAX_FILE);
+    char c = fgetc(file);
+    while(c != EOF){
+        content[strlen(content)] = c;
+        c = fgetc(file);
+    }
+    int size = strlen(content);
+    for(int i=0; i<size; i++){
+        if(content[i] == '{'){
+            if(i == 0) continue;
+            int j = i-1;
+            while(j >= 0 && content[j] == ' '){
+                for(int k=j; k<size; k++) content[k] = content[k+1];
+                size--;
+            }
+        }
+        if(content[i] == '}'){
+            int j = i + 1;
+            while(j<size && content[j] == ' '){
+                for(int k=j; k<size; k++) content[k] = content[k+1];
+                size--;
+            }
+        }
+    }
+
+    for(int i=0; i<size-1; i++){
+        if(content[i] == '{' && content[i+1] != '\n'){
+            for(int j=size; j>i+1; j--) content[j] = content[j-1];
+            content[i+1] = '\n';
+            size++;
+        }
+        if(content[i] == '}' && content[i+1] != '\n'){
+            for(int j=size; j>i+1; j--) content[j] = content[j-1];
+            content[i+1] = '\n';
+            size++;
+        }
+        if(content[i] == '{' && content[i+1] == '}'){
+            for(int j=size; j>i+1; j--) content[j] = content[j-1];
+            content[i+1] = '\n';
+            size++;
+        }
+    }
+
+    for(int i=1; i<size; i++){
+        if(content[i] == '}' && content[i-1] != '\n'){
+            for(int j=size; j>i-1; j--) content[j] = content[j-1];
+            content[i] = '\n';
+            size++;
+        }
+        if(content[i] == '{' && content[i-1] != ' ' && content[i-1] != '\n'){
+            for(int j=size; j>i-1; j--) content[j] = content[j-1];
+            content[i] = ' ';
+            size++;
+        }
+    }
+
+    for(int i=0; i<size; i++){
+        if(content[i] == '{') tab_counter += 4;
+        else if(i != size - 1 && content[i] == '\n' && content[i+1] == '}') tab_counter -=4;
+        if(tab_counter < 0) break;
+        if(content[i] == '\n'){
+            int j = i+1;
+            while(j < size && content[j] == ' '){
+                for(int k=j; k<size; k++) content[k] = content[k+1];
+                size--;
+            }
+            size += tab_counter;
+            for(int j=size; j>i+tab_counter; j--) content[j] = content[j-tab_counter];
+            for(int j=i+1; j<i+tab_counter+1; j++) content[j] = ' ';
+        }
+    }
+    fclose(file);
+    FILE *file1 = fopen(filepath, "w");
+    fprintf(file1, "%s" ,content);
+    fclose(file1);
+    return 1;
+}
