@@ -24,6 +24,8 @@ int find_at(char *filepath, char *str, int n);
 int auto_indent(char *filepath);
 void diff(char *filepath1, char *filepath2);
 char* tree(char* initialpath, int depth, int given_depth);
+int copyb(char *filepath, int line_no, int start_pos, int size);
+int copyf(char *filepath, int line_no, int start_pos, int size);
 
 
 int main(){
@@ -209,6 +211,23 @@ int get_command(){
         if(!get_input(input, &depth_str, "\n", "tree ")) return 0;
         depth = atoi(depth_str);
         printf("%s", tree("root", 0, depth));
+        return 1;
+    }
+
+    else if(!strcmp(initial_command, "copy")){
+        char *filepath, *line_str, *start_str, *size_str;
+        int line_no, start_pos, size;
+        if(!get_input(input, &filepath, " --pos", "--file ")) return 0;
+        if(!get_input(input, &line_str, ":", "--pos ")) return 0;
+        if(!get_input(input, &start_str, " -size", ":")) return 0;
+        if(!get_input(input, &size_str, " -f\n", "-size ") && !get_input(input, &size_str, " -b\n", "-size ")) return 0;
+        char mode = input[strlen(input) - 2];
+        if(mode != 'f' && mode != 'b') return 0;
+        line_no = atoi(line_str);
+        start_pos = atoi(start_str);
+        size = atoi(size_str);
+        if(mode == 'f') copyf(filepath, line_no, start_pos, size);
+        if(mode == 'b') copyb(filepath, line_no, start_pos, size);
         return 1;
     }
     return 0;
@@ -662,4 +681,63 @@ char* tree(char* initialpath, int depth, int given_depth){
     return tree_str;
 }
 
+int copyb(char *filepath, int line_no, int start_pos, int size){
+    char *new_content;
+    char *copied_content;
+    new_content = (char*) malloc(sizeof(char) * MAX_FILE);
+    copied_content = (char*) malloc(sizeof(char) * MAX_FILE);
+    int line_counter = 0, index_counter = 0;
+    FILE *file = fopen(filepath, "r");
+    if(file == NULL) return 0;
+    char c = fgetc(file);
+    while(c != EOF && line_counter != (line_no - 1)){
+        new_content[strlen(new_content)] = c;
+        if(c == '\n') line_counter ++;
+        c = fgetc(file);
+    }
+    while(c != EOF && index_counter != (start_pos)){
+        new_content[strlen(new_content)] = c;
+        index_counter++;
+        c = fgetc(file);
+    }
+    for(int i=0; i<size; i++){
+        copied_content[size - 1 - i] = new_content[strlen(new_content) - 1 - i];
+    }
+    fclose(file);
+    copied_content[strlen(copied_content)] = '\0';
+    char command[MAX_FILE] = "echo ";
+    strcat(command, copied_content);
+    strcat(command, " | pbcopy");
+    system(command);
+    return 1;
+}
+
+int copyf(char *filepath, int line_no, int start_pos, int size){
+    char *copied_content;
+    copied_content = (char*) malloc(sizeof(char) * MAX_FILE);
+    int line_counter = 0, index_counter = 0, copy_counter = 0;
+    FILE *file = fopen(filepath, "r");
+    if(file == NULL) return 0;
+    char c = fgetc(file);
+    while(c != EOF && line_counter != (line_no - 1)){
+        if(c == '\n') line_counter ++;
+        c = fgetc(file);
+    }
+    while(c != EOF && index_counter != (start_pos)){
+        index_counter++;
+        c = fgetc(file);
+    }
+    while (copy_counter < size){
+        c = fgetc(file);
+        copied_content[strlen(copied_content)] = c;
+        copy_counter++;
+    }
+    fclose(file);
+    copied_content[strlen(copied_content)] = '\0';
+    char command[MAX_FILE] = "echo ";
+    strcat(command, copied_content);
+    strcat(command, " | pbcopy");
+    system(command);
+    return 1;
+}
 
