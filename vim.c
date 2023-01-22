@@ -23,6 +23,7 @@ int find_count(char *filepath, char *str);
 int find_at(char *filepath, char *str, int n);
 int auto_indent(char *filepath);
 void diff(char *filepath1, char *filepath2);
+char* tree(char* initialpath, int depth, int given_depth);
 
 
 int main(){
@@ -199,6 +200,15 @@ int get_command(){
         filepath1[strlen(filepath1) - 1 - strlen(filepath2)] = '\0';
         printf("%s\n", filepath1);
         diff(filepath1, filepath2);
+        return 1;
+    }
+
+    else if(!strcmp(initial_command, "tree")){
+        char *depth_str;
+        int depth;
+        if(!get_input(input, &depth_str, "\n", "tree ")) return 0;
+        depth = atoi(depth_str);
+        printf("%s", tree("root", 0, depth));
         return 1;
     }
     return 0;
@@ -623,4 +633,33 @@ void diff(char *filepath1, char *filepath2){
         line_counter++;
     }
 }
+
+char* tree(char* initialpath, int depth, int given_depth){
+    static char tree_str[MAX_FILE];
+    if(depth >= 2 * given_depth) return tree_str;
+    char* path;
+    path = (char*) malloc(sizeof(char) * MAX_FILE);
+    struct dirent *dirpath;
+    DIR *dir = opendir(initialpath);
+    if(!dir) return 0;
+    while((dirpath = readdir(dir)) != NULL){
+        if(strcmp(dirpath->d_name, ".") != 0 && strcmp(dirpath->d_name, "..") != 0){
+            for(int i=0; i<depth; i++){
+                if(i % 2 == 0 || i == 0) tree_str[strlen(tree_str)] = '|';
+                else tree_str[strlen(tree_str)] = ' ';
+            }
+            char add[MAX_FILE] = "├─";
+        strcat(add, dirpath->d_name);
+        strcat(add, "\n");
+        strcat(tree_str, add);
+        strcpy(path, initialpath);
+        strcat(path, "/");
+        strcat(path, dirpath->d_name);
+        tree(path, depth + 2 , given_depth);
+        }
+    }
+    closedir(dir);
+    return tree_str;
+}
+
 
