@@ -28,6 +28,7 @@ int copyb(char *filepath, int line_no, int start_pos, int size);
 int copyf(char *filepath, int line_no, int start_pos, int size);
 int cutf(char *filepath, int line_no, int start_pos, int size);
 int cutb(char *filepath, int line_no, int start_pos, int size);
+int paste(char *filepath, int line_no, int start_pos);
 
 
 int main(){
@@ -247,6 +248,18 @@ int get_command(){
         size = atoi(size_str);
         if(mode == 'f') cutf(filepath, line_no, start_pos, size);
         if(mode == 'b') cutb(filepath, line_no, start_pos, size);
+        return 1;
+    }
+
+    else if(!strcmp(initial_command, "paste")){
+        char *filepath, *line_str, *start_str;
+        int line_no, start_pos, size;
+        if(!get_input(input, &filepath, " --pos", "--file ")) return 0;
+        if(!get_input(input, &line_str, ":", "--pos ")) return 0;
+        if(!get_input(input, &start_str, "\n", ":")) return 0;
+        line_no = atoi(line_str);
+        start_pos = atoi(start_str);
+        paste(filepath, line_no, start_pos);
         return 1;
     }
     return 0;
@@ -672,7 +685,7 @@ void diff(char *filepath1, char *filepath2){
     }
 }
 
-char* tree(char* initialpath, int depth, int given_depth){
+char *tree(char* initialpath, int depth, int given_depth){
     static char tree_str[MAX_FILE];
     if(depth >= 2 * given_depth) return tree_str;
     char* path;
@@ -772,3 +785,13 @@ int cutb(char *filepath, int line_no, int start_pos, int size){
     return 1;
 }
 
+int paste(char *filepath, int line_no, int start_pos){
+    char *str;
+    str = (char*) malloc(sizeof(char) * MAX_FILE);
+    FILE *tmp = fopen("root/tmp.txt", "r");
+    system("pbpaste > root/tmp.txt");
+    str = fgets(str, MAX_FILE, tmp);
+    printf("%s\n", str);
+    insert(filepath, str, line_no, start_pos);
+    return 1;
+}
