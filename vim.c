@@ -26,6 +26,8 @@ void diff(char *filepath1, char *filepath2);
 char* tree(char* initialpath, int depth, int given_depth);
 int copyb(char *filepath, int line_no, int start_pos, int size);
 int copyf(char *filepath, int line_no, int start_pos, int size);
+int cutf(char *filepath, int line_no, int start_pos, int size);
+int cutb(char *filepath, int line_no, int start_pos, int size);
 
 
 int main(){
@@ -228,6 +230,23 @@ int get_command(){
         size = atoi(size_str);
         if(mode == 'f') copyf(filepath, line_no, start_pos, size);
         if(mode == 'b') copyb(filepath, line_no, start_pos, size);
+        return 1;
+    }
+
+    else if(!strcmp(initial_command, "cut")){
+        char *filepath, *line_str, *start_str, *size_str;
+        int line_no, start_pos, size;
+        if(!get_input(input, &filepath, " --pos", "--file ")) return 0;
+        if(!get_input(input, &line_str, ":", "--pos ")) return 0;
+        if(!get_input(input, &start_str, " -size", ":")) return 0;
+        if(!get_input(input, &size_str, " -f\n", "-size ") && !get_input(input, &size_str, " -b\n", "-size ")) return 0;
+        char mode = input[strlen(input) - 2];
+        if(mode != 'f' && mode != 'b') return 0;
+        line_no = atoi(line_str);
+        start_pos = atoi(start_str);
+        size = atoi(size_str);
+        if(mode == 'f') cutf(filepath, line_no, start_pos, size);
+        if(mode == 'b') cutb(filepath, line_no, start_pos, size);
         return 1;
     }
     return 0;
@@ -738,6 +757,18 @@ int copyf(char *filepath, int line_no, int start_pos, int size){
     strcat(command, copied_content);
     strcat(command, " | pbcopy");
     system(command);
+    return 1;
+}
+
+int cutf(char *filepath, int line_no, int start_pos, int size){
+    copyf(filepath, line_no, start_pos, size);
+    removef(filepath, line_no, start_pos, size);
+    return 1;
+}
+
+int cutb(char *filepath, int line_no, int start_pos, int size){
+    copyb(filepath, line_no, start_pos, size);
+    removeb(filepath, line_no, start_pos, size);
     return 1;
 }
 
