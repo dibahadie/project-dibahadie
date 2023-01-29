@@ -13,19 +13,15 @@ char* path_validation(char initial[]);
 int existance_validation(char path[]);
 int get_input(char* command, char** text, char* next_identifier, char*pre_identifier);
 
-
 int insert(char *filepath, char *str, int line_no, int start_pos){
     string_validation(str);
     char* new_content;
     new_content = (char*) malloc(sizeof(char) * MAX_FILE);
     int line_counter=0, index_counter = 0;
     filepath = path_validation(filepath);
-
+    int r = existance_validation(filepath);
+    if(r != 1) return r;
     FILE *file = fopen(filepath, "r");
-    if(file == NULL) {
-        printf("The given file doesn't exist\n");
-        return 0;
-    }
 
     char c = fgetc(file);
     while(c != EOF && line_counter != (line_no - 1)){
@@ -66,21 +62,21 @@ int insert(char *filepath, char *str, int line_no, int start_pos){
 
 int removef(char *filepath, int line_no, int start_pos, int size){
     filepath = path_validation(filepath);
+    int r = existance_validation(filepath);
+    if(r != 1) return r;
+
     char* new_content;
     new_content = (char*) malloc(sizeof(char) * MAX_FILE);
     int line_counter = 0, index_counter = 0, del_counter = 0;
     FILE *file = fopen(filepath, "r");
-    if(file == NULL) {
-        printf("The given file doesn't exist\n");
-        return 0;
-    }
+
     char c = fgetc(file);
     while(c != EOF && line_counter != (line_no - 1)){
         new_content[strlen(new_content)] = c;
         if(c == '\n') line_counter ++;
         c = fgetc(file);
     }
-    while(c != EOF && index_counter != (start_pos + 1)){
+    while(c != EOF && index_counter != (start_pos)){
         new_content[strlen(new_content)] = c;
         index_counter++;
         c = fgetc(file);
@@ -102,14 +98,13 @@ int removef(char *filepath, int line_no, int start_pos, int size){
 
 int removeb(char *filepath, int line_no, int start_pos, int size){
     filepath = path_validation(filepath);
+    int r = existance_validation(filepath);
+    if(r != 1) return r;
+
     char* new_content;
     new_content = (char*) malloc(sizeof(char) * MAX_FILE);
     int line_counter = 0, index_counter = 0, del_counter = 0;
     FILE *file = fopen(filepath, "r");
-    if(file == NULL) {
-        printf("The given file doesn't exist\n");
-        return 0;
-    }
     char c = fgetc(file);
     while(c != EOF && line_counter != (line_no - 1)){
         new_content[strlen(new_content)] = c;
@@ -125,7 +120,6 @@ int removeb(char *filepath, int line_no, int start_pos, int size){
         new_content[strlen(new_content) - 1] = '\0';
         del_counter ++;
     }
-    printf("%s\n", new_content);
     while(c != EOF){
         new_content[strlen(new_content)] = c;
         c = fgetc(file);
@@ -139,7 +133,6 @@ int removeb(char *filepath, int line_no, int start_pos, int size){
 
 int cat(char* filepath){
     filepath = path_validation(filepath);
-    printf("%s\n", filepath);
     int r = existance_validation(filepath);
     if(r != 1) return r;
     FILE * file = fopen(filepath, "r");
@@ -148,6 +141,7 @@ int cat(char* filepath){
         printf("%c", c);
         c = fgetc(file);
     }
+    printf("\n");
     fclose(file);
     return 1;
 }
@@ -159,4 +153,34 @@ int run_cat(char *input){
     return r;
 }
 
+int run_insert(char *input){
+    char *filepath, *str, *str_line, *str_start;
+    int line_no;
+    int start_pos;
+    if(!get_input(input, &filepath, " --str", "--file ")) return -105;
+    if(!get_input(input, &str, " --pos", "--str ")) return -105;
+    if(!get_input(input, &str_line, ":", "--pos ")) return -105;
+    if(!get_input(input, &str_start, "\n", ":")) return -105;
+    line_no = atoi(str_line);
+    start_pos = atoi(str_start);
+    int r = insert(filepath, str, line_no, start_pos);
+    return r;
+}
 
+int run_remove(char *input){
+    char *filepath, *line_str, *start_str, *size_str;
+    int line_no, start_pos, size;
+    if(!get_input(input, &filepath, " --pos", "--file ")) return -105;
+    if(!get_input(input, &line_str, ":", "--pos ")) return -105;
+    if(!get_input(input, &start_str, " -size", ":")) return -105;
+    if(!get_input(input, &size_str, " -f\n", "-size ") && !get_input(input, &size_str, " -b\n", "-size ")) return -105;
+    char mode = input[strlen(input) - 2];
+    if(mode != 'f' && mode != 'b') return -105;
+    line_no = atoi(line_str);
+    start_pos = atoi(start_str);
+    size = atoi(size_str);
+    int r;
+    if(mode == 'f') r = removef(filepath, line_no, start_pos, size);
+    else if(mode == 'b') r = removeb(filepath, line_no, start_pos, size);
+    return r;
+}

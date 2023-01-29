@@ -83,7 +83,7 @@ int existance_validation(char path[]){
     char *dir_path = (char*) malloc(strlen(path) * sizeof(char));
     strncpy(dir_path, path, size - strlen(file_name));
     DIR *dir = opendir(dir_path);
-    if(dir_path == NULL) return no_such_direcotry;
+    if(dir == NULL) return no_such_direcotry;
     closedir(dir);
     FILE *file = fopen(path, "r");
     if(file == NULL) return no_such_file;

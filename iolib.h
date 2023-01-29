@@ -48,3 +48,7 @@ void print_error(errors error){
         break;
     }
 }
+
+void output(char *outstr){
+    printf("");
+}

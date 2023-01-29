@@ -12,7 +12,6 @@
 #include "auto_indent.h"
 #include "tree.h"
 #include "diff.h"
-// #include "iolib.h"
 #define MAX_SIZE 500
 #define MAX_FILE 10000
 
@@ -41,35 +40,16 @@ int get_command(){
     else if(!strcmp(initial_command, "cat")){
         return run_cat(input);
     }
+
     else if(!strcmp(initial_command, "insertstr")){
-        char *filepath, *str, *str_line, *str_start;
-        int line_no;
-        int start_pos;
-        if(!get_input(input, &filepath, " --str", "--file ")) return 0;
-        if(!get_input(input, &str, " --pos", "--str ")) return 0;
-        if(!get_input(input, &str_line, ":", "--pos ")) return 0;
-        if(!get_input(input, &str_start, "\n", ":")) return 0;
-        line_no = atoi(str_line);
-        start_pos = atoi(str_start);
-        insert(filepath, str, line_no, start_pos);
-        return 1;
+        return run_insert(input);
     }
+
     else if(!strcmp(initial_command, "removestr")){
-        char *filepath, *line_str, *start_str, *size_str;
-        int line_no, start_pos, size;
-        if(!get_input(input, &filepath, " --pos", "--file ")) return 0;
-        if(!get_input(input, &line_str, ":", "--pos ")) return 0;
-        if(!get_input(input, &start_str, " -size", ":")) return 0;
-        if(!get_input(input, &size_str, " -f\n", "-size ") && !get_input(input, &size_str, " -b\n", "-size ")) return 0;
-        char mode = input[strlen(input) - 2];
-        if(mode != 'f' && mode != 'b') return 0;
-        line_no = atoi(line_str);
-        start_pos = atoi(start_str);
-        size = atoi(size_str);
-        if(mode == 'f') removef(filepath, line_no, start_pos, size);
-        if(mode == 'b') removeb(filepath, line_no, start_pos, size);
-        return 1;
-    }else if(!strcmp(initial_command, "find")){
+        return run_remove(input);
+    }
+    
+    else if(!strcmp(initial_command, "find")){
         char *filepath, *str;
         if(!get_input(input, &str, " --file", "--str ")) return 0;
         string_validation(str);
@@ -169,6 +149,8 @@ int get_command(){
         paste(filepath, line_no, start_pos);
         return 1;
     }
+
+    
     return 0;
 }
 
