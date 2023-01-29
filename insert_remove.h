@@ -4,11 +4,14 @@
 #include <sys/stat.h>
 #include <string.h>
 #include <stdlib.h>
+#include <unistd.h> 
 #define MAX_SIZE 500
 #define MAX_FILE 10000
 
 void string_validation(char initial[]);
 char* path_validation(char initial[]);
+int existance_validation(char path[]);
+int get_input(char* command, char** text, char* next_identifier, char*pre_identifier);
 
 
 int insert(char *filepath, char *str, int line_no, int start_pos){
@@ -136,11 +139,10 @@ int removeb(char *filepath, int line_no, int start_pos, int size){
 
 int cat(char* filepath){
     filepath = path_validation(filepath);
-    FILE* file = fopen(filepath, "r");
-    if(file == NULL) {
-        printf("File can't be opened\n");
-        return 0;
-    }
+    printf("%s\n", filepath);
+    int r = existance_validation(filepath);
+    if(r != 1) return r;
+    FILE * file = fopen(filepath, "r");
     char c = fgetc(file);
     while(c != EOF){
         printf("%c", c);
@@ -148,6 +150,13 @@ int cat(char* filepath){
     }
     fclose(file);
     return 1;
+}
+
+int run_cat(char *input){
+    char *filepath;
+    if(!get_input(input, &filepath, "\n", "--file ")) return -105;
+    int r = cat(filepath);  
+    return r;
 }
 
 

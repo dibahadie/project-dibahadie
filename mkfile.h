@@ -4,11 +4,13 @@
 #include <sys/stat.h>
 #include <string.h>
 #include <stdlib.h>
+#include <unistd.h> 
 #include "iolib.h"
 #define MAX_SIZE 500
 #define MAX_FILE 10000
 
 char* path_validation(char initial[]);
+int get_input(char* command, char** text, char* next_identifier, char*pre_identifier);
 
 int create_dir(char *path){
     char *remained_path;
@@ -67,4 +69,24 @@ int run_create_file(char *input){
     if(!get_input(input, &filepath, "\n", "--file ")) return invalid_command;
     int result = create_file(filepath);
     return result;
+}
+
+int existance_validation(char path[]){
+    char *file_name = strrchr(path, '/');
+    file_name++;
+    int size = strlen(path);
+    if(file_name == NULL){
+        FILE *file = fopen(path, "r");
+        if(file == NULL) return no_such_file;
+        fclose(file);
+    }
+    char *dir_path = (char*) malloc(strlen(path) * sizeof(char));
+    strncpy(dir_path, path, size - strlen(file_name));
+    DIR *dir = opendir(dir_path);
+    if(dir_path == NULL) return no_such_direcotry;
+    closedir(dir);
+    FILE *file = fopen(path, "r");
+    if(file == NULL) return no_such_file;
+    fclose(file);
+    return 1;
 }

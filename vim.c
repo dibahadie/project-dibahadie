@@ -12,6 +12,7 @@
 #include "auto_indent.h"
 #include "tree.h"
 #include "diff.h"
+// #include "iolib.h"
 #define MAX_SIZE 500
 #define MAX_FILE 10000
 
@@ -38,10 +39,7 @@ int get_command(){
     }
 
     else if(!strcmp(initial_command, "cat")){
-        char *filepath;
-        if(!get_input(input, &filepath, "\n", "--file ")) return 0;
-        cat(filepath);
-        return 1;
+        return run_cat(input);
     }
     else if(!strcmp(initial_command, "insertstr")){
         char *filepath, *str, *str_line, *str_start;
