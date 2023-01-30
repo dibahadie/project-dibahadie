@@ -104,24 +104,25 @@ int get_command(){
         return 1;
     }
 
-    else if(!strcmp(initial_command, "copy")){
+    else if(!strcmp(initial_command, "copystr")){
         char *filepath, *line_str, *start_str, *size_str;
         int line_no, start_pos, size;
-        if(!get_input(input, &filepath, " --pos", "--file ")) return 0;
-        if(!get_input(input, &line_str, ":", "--pos ")) return 0;
-        if(!get_input(input, &start_str, " -size", ":")) return 0;
-        if(!get_input(input, &size_str, " -f\n", "-size ") && !get_input(input, &size_str, " -b\n", "-size ")) return 0;
+        if(!get_input(input, &filepath, " --pos", "--file ")) return -105;
+        if(!get_input(input, &line_str, ":", "--pos ")) return -105;
+        if(!get_input(input, &start_str, " -size", ":")) return -1055;
+        if(!get_input(input, &size_str, " -f\n", "-size ") && !get_input(input, &size_str, " -b\n", "-size ")) return -105;
         char mode = input[strlen(input) - 2];
-        if(mode != 'f' && mode != 'b') return 0;
+        if(mode != 'f' && mode != 'b') return -105;
         line_no = atoi(line_str);
         start_pos = atoi(start_str);
         size = atoi(size_str);
-        if(mode == 'f') copyf(filepath, line_no, start_pos, size);
-        if(mode == 'b') copyb(filepath, line_no, start_pos, size);
-        return 1;
+        int r;
+        if(mode == 'f') r =copyf(filepath, line_no, start_pos, size);
+        if(mode == 'b') r= copyb(filepath, line_no, start_pos, size);
+        return r;
     }
 
-    else if(!strcmp(initial_command, "cut")){
+    else if(!strcmp(initial_command, "cutstr")){
         char *filepath, *line_str, *start_str, *size_str;
         int line_no, start_pos, size;
         if(!get_input(input, &filepath, " --pos", "--file ")) return 0;
@@ -138,7 +139,7 @@ int get_command(){
         return 1;
     }
 
-    else if(!strcmp(initial_command, "paste")){
+    else if(!strcmp(initial_command, "pastestr")){
         char *filepath, *line_str, *start_str;
         int line_no, start_pos, size;
         if(!get_input(input, &filepath, " --pos", "--file ")) return 0;
