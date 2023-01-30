@@ -23,7 +23,7 @@ int copyb(char *filepath, int line_no, int start_pos, int size){
     char *copied_content;
     new_content = (char*) malloc(sizeof(char) * MAX_FILE);
     copied_content = (char*) malloc(sizeof(char) * MAX_FILE);
-    int line_counter = 0, index_counter = 0;
+    int line_counter = 1, index_counter = 0;
     FILE *file = fopen(filepath, "r");
     if(file == NULL) return 0;
     char c = fgetc(file);
@@ -106,5 +106,52 @@ int paste(char *filepath, int line_no, int start_pos){
     system("pbpaste > root/tmp.txt");
     str = fgets(str, MAX_FILE, tmp);
     insert(filepath, str, line_no, start_pos);
+    return 1;
+}
+
+int run_copy(char *input){
+    char *filepath, *line_str, *start_str, *size_str;
+    int line_no, start_pos, size;
+    if(!get_input(input, &filepath, " --pos", "--file ")) return -105;
+    if(!get_input(input, &line_str, ":", "--pos ")) return -105;
+    if(!get_input(input, &start_str, " -size", ":")) return -1055;
+    if(!get_input(input, &size_str, " -f\n", "-size ") && !get_input(input, &size_str, " -b\n", "-size ")) return -105;
+    char mode = input[strlen(input) - 2];
+    if(mode != 'f' && mode != 'b') return -105;
+    line_no = atoi(line_str);
+    start_pos = atoi(start_str);
+    size = atoi(size_str);
+    int r;
+    if(mode == 'f') r =copyf(filepath, line_no, start_pos, size);
+    if(mode == 'b') r= copyb(filepath, line_no, start_pos, size);
+    return r;
+}
+
+int run_cut(char *input){
+    char *filepath, *line_str, *start_str, *size_str;
+    int line_no, start_pos, size;
+    if(!get_input(input, &filepath, " --pos", "--file ")) return -105;
+    if(!get_input(input, &line_str, ":", "--pos ")) return -105;
+    if(!get_input(input, &start_str, " -size", ":")) return -105;
+    if(!get_input(input, &size_str, " -f\n", "-size ") && !get_input(input, &size_str, " -b\n", "-size ")) return -105;
+    char mode = input[strlen(input) - 2];
+    if(mode != 'f' && mode != 'b') return -105;
+    line_no = atoi(line_str);
+    start_pos = atoi(start_str);
+    size = atoi(size_str);
+    if(mode == 'f') cutf(filepath, line_no, start_pos, size);
+    if(mode == 'b') cutb(filepath, line_no, start_pos, size);
+    return 1;
+}
+
+int run_paste(char *input){
+    char *filepath, *line_str, *start_str;
+    int line_no, start_pos, size;
+    if(!get_input(input, &filepath, " --pos", "--file ")) return 0;
+    if(!get_input(input, &line_str, ":", "--pos ")) return 0;
+    if(!get_input(input, &start_str, "\n", ":")) return 0;
+    line_no = atoi(line_str);
+    start_pos = atoi(start_str);
+    paste(filepath, line_no, start_pos);
     return 1;
 }
