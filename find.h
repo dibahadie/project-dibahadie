@@ -10,6 +10,7 @@
 char* path_validation(char initial[]);
 int existance_validation(char path[]);
 int get_input(char* command, char** text, char* next_identifier, char*pre_identifier);
+void string_validation(char initial[]);
 
 char *strstr_wild(char *str, char *to_be_found){
     char *ptr = strchr(to_be_found, '*');
@@ -85,6 +86,7 @@ int find_first_index(char *filepath, char *str){
     filepath = path_validation(filepath);
     int r = existance_validation(filepath);
     if(r != 1) return r;
+
     FILE *file = fopen(filepath, "r");
     char c = fgetc(file);
     char *content;
@@ -95,8 +97,7 @@ int find_first_index(char *filepath, char *str){
     }
     char *loc_ptr = strstr_wild(content, str);
     if(loc_ptr == NULL){
-        printf("Expression not found\n");
-        return -1;
+        return -103;
     }
     int index = strlen(content) - strlen(loc_ptr);
     return index;
@@ -104,12 +105,12 @@ int find_first_index(char *filepath, char *str){
 
 int find_count(char *filepath, char *str){
     filepath = path_validation(filepath);
+    int r = existance_validation(filepath);
+    if(r != 1) return r;
+
     int counter = 0;
     FILE *file = fopen(filepath, "r");
-    if(file == NULL){
-        printf("The given file doesn't exist\n");
-        return -1;
-    }
+
     char c = fgetc(file);
     char *content, *buff;
     buff = (char*) malloc(sizeof(str));
@@ -120,8 +121,7 @@ int find_count(char *filepath, char *str){
     }
     char *loc_ptr = strstr(content, str);
     if(loc_ptr == NULL){
-        printf("Expression not found\n");
-        return -1;
+        return 0;
     }
     while(loc_ptr != NULL){
         counter++;
@@ -132,11 +132,12 @@ int find_count(char *filepath, char *str){
 
 int find_at(char *filepath, char *str, int n){
     filepath = path_validation(filepath);
+    int r = existance_validation(filepath);
+    if(r != 1) return r;
+
     int counter = 1;
     FILE *file = fopen(filepath, "r");
-    if(file == NULL){
-        return -2;
-    }
+
     char c = fgetc(file);
     char *content, *buff;
     buff = (char*) malloc(sizeof(str));
@@ -151,10 +152,81 @@ int find_at(char *filepath, char *str, int n){
         counter++;
         loc_ptr = strstr(loc_ptr + 1, str);
     }
-    if(counter != n) return -1;
+    if(counter <= n) return -103;
     else{
         int index = strlen(content) - strlen(loc_ptr);
         return index;
     }
 }
 
+int find_byword(char *filepath, char *str){
+    filepath = path_validation(filepath);
+    int r = existance_validation(filepath);
+    if(r != 1) return r;
+    FILE *file = fopen(filepath, "r");
+    char c = fgetc(file);
+    int word_counter = 1;
+    int index = find_first_index(filepath, str);
+    for(int i=0; i<index - 1; i++) {
+        c = fgetc(file);
+        if(c == ' ' || c == '\n') word_counter++;
+    }
+    return word_counter;
+    }
+
+int find_all(char *filepath, char *str){
+    int count = find_count(filepath, str);    
+    printf("%d", find_at(filepath, str, 1));
+    for(int i=1; i<count; i++){
+        printf(", %d", find_at(filepath, str, i+1));
+    }
+    return 0;
+}
+
+int run_find(char *input){
+    char *filepath, *str;
+    if(!get_input(input, &str, " --file", "--str ")) return -105;
+    string_validation(str);
+
+    char *count_ptr = strstr(input, "-count");
+    char *all_ptr = strstr(input, "-all");
+    char *byword_ptr = strstr(input, "-byword");
+    char *at_ptr = strstr(input, "-at");
+
+    // no option
+    if(count_ptr == NULL && all_ptr == NULL && byword_ptr == NULL && at_ptr == NULL){
+        if(!get_input(input, &filepath, "\n", "--file ")) return -105;
+        return find_first_index(filepath, str);
+    }
+
+    // count option
+    else if(all_ptr == NULL && byword_ptr == NULL && at_ptr == NULL){
+    if(!get_input(input, &filepath, " -count", "--file ")) return -105;
+        return find_count(filepath, str);
+    }
+
+    // at option
+    else if(count_ptr == NULL && all_ptr == NULL && byword_ptr == NULL){
+        char *n_str;
+        int n;
+        if(!get_input(input, &filepath, " -at", "--file ")) return -105;
+        if(!get_input(input, &n_str, "\n", "-at ")) return -105;
+        n = atoi(n_str);
+        return find_at(filepath, str, n);
+    }
+
+    // byword option
+    else if(count_ptr == NULL && all_ptr == NULL && at_ptr == NULL){
+        if(!get_input(input, &filepath, " -byword", "--file ")) return -105;
+        return find_byword(filepath, str);
+    }
+
+    // all option
+    else if(count_ptr == NULL && at_ptr == NULL && byword_ptr == NULL){
+        if(!get_input(input, &filepath, " -all", "--file ")) return -105;
+        find_all(filepath, str);
+        return -1;
+    }
+    
+    return -105;
+    }

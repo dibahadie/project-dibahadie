@@ -11,7 +11,7 @@ typedef enum{
     no_such_file = -100,
     no_such_direcotry = -101,
     file_already_exists = -102,
-    string_not_found = -103,
+    expression_not_found = -103,
     invalid_depth = -104,
     invalid_command = -105,
     file_creation_failed = -106
@@ -31,8 +31,8 @@ void print_error(errors error){
         printf("The given file already exists\n");
         break;
 
-    case string_not_found:
-        printf("String not found\n");
+    case expression_not_found:
+        printf("-1\nExpression not found\n");
         break;
 
     case invalid_depth:
