@@ -31,7 +31,7 @@ int get_command(){
     input = (char*) malloc(sizeof(char) * MAX_SIZE);
     fgets(input, MAX_SIZE, stdin);
     char *initial_command, *remaining;
-    if(gnc(&input, &initial_command, &remaining) == 0) return 0;
+    if(gnc(&input, &initial_command, &remaining) == 0) return -105;
 
     if(!strcmp(initial_command, "createfile")){
         return run_create_file(input);

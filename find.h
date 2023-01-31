@@ -152,21 +152,21 @@ int find_at(char *filepath, char *str, int n){
         counter++;
         loc_ptr = strstr(loc_ptr + 1, str);
     }
-    if(counter <= n) return -103;
+    if(counter < n) return -103;
     else{
         int index = strlen(content) - strlen(loc_ptr);
         return index;
     }
 }
 
-int find_byword(char *filepath, char *str){
+int find_byword(char *filepath, char *str, int n){
     filepath = path_validation(filepath);
     int r = existance_validation(filepath);
     if(r != 1) return r;
     FILE *file = fopen(filepath, "r");
     char c = fgetc(file);
     int word_counter = 1;
-    int index = find_first_index(filepath, str);
+    int index = find_at(filepath, str, n);
     for(int i=0; i<index - 1; i++) {
         c = fgetc(file);
         if(c == ' ' || c == '\n') word_counter++;
@@ -175,12 +175,34 @@ int find_byword(char *filepath, char *str){
     }
 
 int find_all(char *filepath, char *str){
+    filepath = path_validation(filepath);
+    int r = existance_validation(filepath);
+    if(r != 1) return r;
+    
     int count = find_count(filepath, str);    
+    if(count == 0) return -103;
     printf("%d", find_at(filepath, str, 1));
     for(int i=1; i<count; i++){
         printf(", %d", find_at(filepath, str, i+1));
     }
-    return 0;
+    return 1;
+}
+
+int find_all_byword(char *filepath, char *str){
+    filepath = path_validation(filepath);
+    int r = existance_validation(filepath);
+    if(r != 1) return r;
+
+    int count = find_count(filepath, str);
+    if(count == 0) return -103;
+    int word = find_byword(filepath, str, 1);
+    printf("%d", word);
+    for(int i=1; i<count; i++){
+        word = find_byword(filepath, str, i+1);
+        printf(", %d", word);
+    }
+    printf("\n");
+    return -1;
 }
 
 int run_find(char *input){
@@ -218,14 +240,40 @@ int run_find(char *input){
     // byword option
     else if(count_ptr == NULL && all_ptr == NULL && at_ptr == NULL){
         if(!get_input(input, &filepath, " -byword", "--file ")) return -105;
-        return find_byword(filepath, str);
+        return find_byword(filepath, str, 1);
     }
 
     // all option
     else if(count_ptr == NULL && at_ptr == NULL && byword_ptr == NULL){
         if(!get_input(input, &filepath, " -all", "--file ")) return -105;
-        find_all(filepath, str);
-        return -1;
+        return find_all(filepath, str);
+    }
+
+    // all byword options
+    else if(count_ptr == NULL && at_ptr == NULL){
+        if(all_ptr > byword_ptr){
+            if(!get_input(input, &filepath, " -byword", "--file ")) return -105;
+        }
+        else{
+            if(!get_input(input, &filepath, " -all", "--file ")) return -105;
+        }
+        return find_all_byword(filepath, str);
+    }
+
+    // at byword options
+    else if(count_ptr == NULL && all_ptr == NULL){
+        char *n_str;
+        int n;
+        if(at_ptr > byword_ptr){
+            if(!get_input(input, &filepath, " -byword", "--file ")) return -105;
+            if(!get_input(input, &n_str, "\n", "-at ")) return -105;
+        }
+        else{
+            if(!get_input(input, &filepath, " -at", "--file ")) return -105;
+            if(!get_input(input, &n_str, " -byword", "-at ")) return -105;
+        }
+        n = atoi(n_str);
+        return find_byword(filepath, str, n);
     }
     
     return -105;
