@@ -23,6 +23,7 @@ char *strstr_wild(char *str, char *to_be_found){
             ptr = strstr(str, to_be_found);
             if(ptr == NULL) return NULL;
             int index = strlen(str) - strlen(ptr);
+            if(index == 0 || str[index - 1] == '\0' || str[index - 1] == EOF || str[index - 1] == '\n' || str[index - 1] == ' ') return strstr_wild(ptr + strlen(to_be_found), to_be_found - 1);
             while(str[index] != EOF && str[index] != '\0' && str[index] != ' ' && str[index] != '\n'){
                 ptr--;
                 index--;
@@ -57,10 +58,11 @@ char *strstr_wild(char *str, char *to_be_found){
             char *first_part = (char*) malloc(sizeof(to_be_found));
             char *second_part = (char*) malloc(sizeof(to_be_found));
             strncpy(first_part, to_be_found, strlen(to_be_found) - strlen(ptr));
-            strcpy(second_part, to_be_found + strlen(first_part) + 2);
 
             if(first_part[strlen(first_part) - 1] != ' '){
-                char *find = strstr(str, first_part);
+                strcpy(second_part, to_be_found + strlen(first_part) + 2);
+                char *find = strstr_wild(str, first_part);
+                if(find == NULL) return NULL;
                 char *ptr_tmp = find;
                 ptr_tmp += strlen(first_part);
                 if(*(ptr_tmp) == ' ' || *(ptr_tmp) == EOF || *(ptr_tmp) == '\0') return NULL;
@@ -76,6 +78,19 @@ char *strstr_wild(char *str, char *to_be_found){
                     }
                     return find;
                 }
+            }
+            else{
+                printf("called\n");
+                printf("%s\n-------\n", str);
+                strcpy(second_part, to_be_found + strlen(first_part));
+                char *find = strstr_wild(str, second_part);
+                if(find == NULL) return NULL;
+                char *ptr_tmp = find;
+                ptr_tmp -= strlen(first_part);
+                char *new_first = (char*) malloc(sizeof(to_be_found));
+                strncpy(new_first, ptr_tmp, strlen(first_part));
+                if(strcmp(new_first, first_part) == 0) return ptr_tmp;
+                else return strstr_wild(str + 1 ,to_be_found);
             }
             return NULL;
         }
@@ -119,13 +134,13 @@ int find_count(char *filepath, char *str){
         content[strlen(content)] = c;
         c = fgetc(file);
     }
-    char *loc_ptr = strstr(content, str);
+    char *loc_ptr = strstr_wild(content, str);
     if(loc_ptr == NULL){
         return 0;
     }
     while(loc_ptr != NULL){
         counter++;
-        loc_ptr = strstr(loc_ptr + 1, str);
+        loc_ptr = strstr_wild(loc_ptr + 1, str);
     }
     return counter;
 }
@@ -146,11 +161,11 @@ int find_at(char *filepath, char *str, int n){
         content[strlen(content)] = c;
         c = fgetc(file);
     }
-    char *loc_ptr = strstr(content, str);
+    char *loc_ptr = strstr_wild(content, str);
     if(loc_ptr == NULL) return -1;
     while(loc_ptr != NULL && counter != n){
         counter++;
-        loc_ptr = strstr(loc_ptr + 1, str);
+        loc_ptr = strstr_wild(loc_ptr + 1, str);
     }
     if(counter < n) return -103;
     else{
@@ -278,3 +293,5 @@ int run_find(char *input){
     
     return -105;
     }
+
+    
