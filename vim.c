@@ -12,7 +12,7 @@
 #include "auto_indent.h"
 #include "tree.h"
 #include "diff.h"
-//#include "replace.h"
+#include "replace.h"
 #define MAX_SIZE 500
 #define MAX_FILE 10000
 
@@ -95,9 +95,9 @@ int get_command(){
         return run_paste(input);
     }
 
-    // else if(!strcmp(initial_command, "replace")){
-    //     return run_replace(input);
-    // }
+    else if(!strcmp(initial_command, "replace")){
+        return run_replace(input);
+    }
 
     return -105;
 }

@@ -23,8 +23,8 @@ char *strstr_wild(char *str, char *to_be_found){
             ptr = strstr(str, to_be_found);
             if(ptr == NULL) return NULL;
             int index = strlen(str) - strlen(ptr);
-            if(index == 0 || str[index - 1] == '\0' || str[index - 1] == EOF || str[index - 1] == '\n' || str[index - 1] == ' ') return strstr_wild(ptr + strlen(to_be_found), to_be_found - 1);
-            while(str[index] != EOF && str[index] != '\0' && str[index] != ' ' && str[index] != '\n'){
+            if(index == 0 || str[index - 1] == '\0' || str[index - 1] == EOF || str[index - 1] == ' ') return strstr_wild(ptr + strlen(to_be_found), to_be_found - 1);
+            while(str[index] != EOF && str[index] != '\0' && str[index] != ' '){
                 ptr--;
                 index--;
             }
@@ -37,7 +37,7 @@ char *strstr_wild(char *str, char *to_be_found){
             ptr = strstr(str, new);
             if(ptr == NULL) return NULL;
             int index = strlen(str) - strlen(ptr) + strlen(new);
-            if(str[index] == '\0' || str[index] == EOF || str[index] == '\n') return NULL;
+            if(str[index] == '\0' || str[index] == EOF  || str[index] == ' ') return strstr_wild(str + strlen(new) + 1, to_be_found);
             return ptr;
         }
         else if(to_be_found[strlen(to_be_found) - 1] == '*' && to_be_found[strlen(to_be_found) - 1] == '\\'){
@@ -80,8 +80,6 @@ char *strstr_wild(char *str, char *to_be_found){
                 }
             }
             else{
-                printf("called\n");
-                printf("%s\n-------\n", str);
                 strcpy(second_part, to_be_found + strlen(first_part));
                 char *find = strstr_wild(str, second_part);
                 if(find == NULL) return NULL;
