@@ -49,6 +49,9 @@ int replace_at(char *filepath, char *initial_str, char *final_str, int n){
 }
 
 int replace_all(char *filepath, char *initial_str, char *final_str){
+    filepath = path_validation(filepath);
+    int r = existance_validation(filepath);
+    if(r != 1) return r;
     int count = find_count(filepath, initial_str);
     for(int i=0; i<count; i++){
         replace_at(filepath, initial_str, final_str, 1);

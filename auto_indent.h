@@ -11,6 +11,9 @@ char* path_validation(char initial[]);
 
 int auto_indent(char *filepath){
     filepath = path_validation(filepath);
+    int r = existance_validation(filepath);
+    if(r != 1) return r;
+    
     int tab_counter = 0;
     FILE *file = fopen(filepath, "r");
     char *content;

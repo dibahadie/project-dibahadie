@@ -110,9 +110,11 @@ int find_first_index(char *filepath, char *str){
     }
     char *loc_ptr = strstr_wild(content, str);
     if(loc_ptr == NULL){
+        fclose(file);
         return -103;
     }
     int index = strlen(content) - strlen(loc_ptr);
+    fclose(file);
     return index;
 }
 
@@ -292,4 +294,16 @@ int run_find(char *input){
     return -105;
     }
 
-    
+int find_line_number_at(char *filepath, char *str, int n){
+    int index = find_at(filepath, str, n);
+    if(index == -103) return -1;
+    FILE *file = fopen(filepath, "r");
+    if(file == NULL) return -1;
+    char c;
+    int line_counter = 1;
+    for(int i=0; i<index; i++){
+        c = fgetc(file);
+        if(c == '\n') line_counter++;
+    }
+    return line_counter;
+}

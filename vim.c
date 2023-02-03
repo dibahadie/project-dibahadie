@@ -13,6 +13,7 @@
 #include "tree.h"
 #include "diff.h"
 #include "replace.h"
+#include "grep.h"
 #define MAX_SIZE 500
 #define MAX_FILE 10000
 
@@ -54,6 +55,10 @@ int get_command(){
         int r = run_find(input);
         if(r >= 0) printf("%d\n", r);
         return r;
+    }
+
+    else if(!strcmp(initial_command, "grep")){
+        return run_grep(input);
     }
 
     else if(!strcmp(initial_command, "auto-indent")){
