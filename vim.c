@@ -20,101 +20,106 @@
 #define MAX_FILE 10000
 
 
-int get_command();
+char* run_command(char *input);
 
 int main(){
     mkdir("root", 0777);
     mkdir("backup", 0777);
     while(1){
-        int r = get_command();
-        print_error(r);
+        char *input = (char*) malloc(sizeof(char) * MAX_SIZE);
+        fgets(input, MAX_SIZE, stdin);
+        char* output = run_command(input);
+        printf("%s", output);
+        // print_output(output);
+        free(input);
+        free(output);
     }
 }
 
-int get_command(){
-    char *input;
-    input = (char*) malloc(sizeof(char) * MAX_SIZE);
-    fgets(input, MAX_SIZE, stdin);
+char* run_command(char *input){
     char *initial_command, *remaining;
-    if(gnc(&input, &initial_command, &remaining) == 0) return -105;
+    if(gnc(&input, &initial_command, &remaining) == 0) return NULL;
 
-    if(strstr(input, "=D") != NULL){
-        return run_arman(input);
-    }
+    // if(strstr(input, "=D") != NULL){
+    //     return run_arman(input);
+    // }
 
     else if(!strcmp(initial_command, "createfile")){
-        return run_create_file(input);
+        int r = run_create_file(input);
+        char* r_str = (char*) malloc(sizeof(char) * MAX_FILE);
+        itoa(r_str, r);
+        return r_str;
     }
 
     else if(!strcmp(initial_command, "cat")){
         return run_cat(input);
     }
 
-    else if(!strcmp(initial_command, "insertstr")){
-        return run_insert(input);
-    }
+    // else if(!strcmp(initial_command, "insertstr")){
+    //     return run_insert(input);
+    // }
 
-    else if(!strcmp(initial_command, "removestr")){
-        return run_remove(input);
-    }
+    // else if(!strcmp(initial_command, "removestr")){
+    //     return run_remove(input);
+    // }
     
-    else if(!strcmp(initial_command, "find")){
-        int r = run_find(input);
-        if(r >= 0) printf("%d\n", r);
-        return r;
-    }
+    // else if(!strcmp(initial_command, "find")){
+    //     int r = run_find(input);
+    //     if(r >= 0) printf("%d\n", r);
+    //     return r;
+    // }
 
-    else if(!strcmp(initial_command, "grep")){
-        return run_grep(input);
-    }
+    // else if(!strcmp(initial_command, "grep")){
+    //     return run_grep(input);
+    // }
 
-    else if(!strcmp(initial_command, "auto-indent")){
-        char *filepath;
-        if(!get_input(input, &filepath, "\n", "--file ")) return -105;
-        auto_indent(filepath);
-        return 1;
-    }
+    // else if(!strcmp(initial_command, "auto-indent")){
+    //     char *filepath;
+    //     if(!get_input(input, &filepath, "\n", "--file ")) return -105;
+    //     auto_indent(filepath);
+    //     return 1;
+    // }
 
-    else if(!strcmp(initial_command, "compare")){
-        char *filepath1, *filepath2;
-        if(!get_input(input, &filepath1, "\n", "compare ")) return -105;
-        filepath2 = strchr(filepath1 + 1, ' ');
-        filepath2 ++;
-        filepath1[strlen(filepath1) - 1 - strlen(filepath2)] = '\0';
-        printf("%s\n", filepath1);
-        diff(filepath1, filepath2);
-        return 1;
-    }
+    // else if(!strcmp(initial_command, "compare")){
+    //     char *filepath1, *filepath2;
+    //     if(!get_input(input, &filepath1, "\n", "compare ")) return -105;
+    //     filepath2 = strchr(filepath1 + 1, ' ');
+    //     filepath2 ++;
+    //     filepath1[strlen(filepath1) - 1 - strlen(filepath2)] = '\0';
+    //     printf("%s\n", filepath1);
+    //     diff(filepath1, filepath2);
+    //     return 1;
+    // }
 
-    else if(!strcmp(initial_command, "tree")){
-        char *depth_str;
-        int depth;
-        if(!get_input(input, &depth_str, "\n", "tree ")) return -105;
-        depth = atoi(depth_str);
-        printf("%s", tree("root", 0, depth));
-        return 1;
-    }
+    // else if(!strcmp(initial_command, "tree")){
+    //     char *depth_str;
+    //     int depth;
+    //     if(!get_input(input, &depth_str, "\n", "tree ")) return -105;
+    //     depth = atoi(depth_str);
+    //     printf("%s", tree("root", 0, depth));
+    //     return 1;
+    // }
 
-    else if(!strcmp(initial_command, "copystr")){
-        return run_copy(input);
-    }
+    // else if(!strcmp(initial_command, "copystr")){
+    //     return run_copy(input);
+    // }
 
-    else if(!strcmp(initial_command, "cutstr")){
-        return run_cut(input);
-    }
+    // else if(!strcmp(initial_command, "cutstr")){
+    //     return run_cut(input);
+    // }
 
-    else if(!strcmp(initial_command, "pastestr")){
-        return run_paste(input);
-    }
+    // else if(!strcmp(initial_command, "pastestr")){
+    //     return run_paste(input);
+    // }
 
-    else if(!strcmp(initial_command, "replace")){
-        return run_replace(input);
-    }
+    // else if(!strcmp(initial_command, "replace")){
+    //     return run_replace(input);
+    // }
 
-    else if(!strcmp(initial_command, "undo")){
-        return run_undo(input);
-    }
+    // else if(!strcmp(initial_command, "undo")){
+    //     return run_undo(input);
+    // }
 
-    return -105;
+    // return -105;
 }
 

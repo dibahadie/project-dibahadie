@@ -17,7 +17,8 @@ typedef enum{
     file_creation_failed = -106
 }errors;
 
-void print_error(errors error){
+void print_output(char *output){
+    int error = atoi(output);
     switch (error){
     case no_such_file:
         printf("File doesn't exist\n");

@@ -92,3 +92,41 @@ int gnc(char** command, char** next_command, char** remaining){
     return 1;
 }
 
+void itoa(char str[], int num){
+    switch (num){
+    case -100:
+        strcpy(str, "File doesn't exist\n");
+        return;
+    case -101:
+        strcpy(str, "Directory doesn't exist\n");
+        return;
+    case -102:
+        strcpy(str, "The given file already exists\n");
+        return;
+    case -103:
+        strcpy(str, "-1\nExpression not found\n");
+        return;
+    case -104:
+        strcpy(str, "Invalid depth\n");
+        return;
+    case -105:
+        strcpy(str, "Invalid command\n");
+        return;
+    case -106:
+        strcpy(str, "File creation failed\n");
+        return;
+    }
+    int digit, len = 0, n;
+    n = num;
+    while(n > 0){
+        len++;
+        n /= 10;
+    }
+    for(int i=0; i<len; i++){
+        digit = num % 10;
+        num = num / 10;
+        str[len - (i+1)] = digit + '0';
+    }
+    str[len] = '\0';
+}
+
