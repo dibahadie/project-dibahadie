@@ -66,7 +66,7 @@ int create_file(char *path){
             else{
                 fclose(file);
                 fclose(b_file);
-                return 1;
+                return -107;
             }
         }
     }else{
@@ -86,7 +86,7 @@ int create_file(char *path){
             }
             fclose(file);
             fclose(b_file);
-            return 1;
+            return -107;
         }
         else{
             return file_already_exists;

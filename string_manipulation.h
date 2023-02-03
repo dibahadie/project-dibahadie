@@ -92,29 +92,32 @@ int gnc(char** command, char** next_command, char** remaining){
     return 1;
 }
 
-void itoa(char str[], int num){
+char* itoa(int num){
+    char *str = (char*) malloc(sizeof(char) * MAX_FILE);
     switch (num){
     case -100:
         strcpy(str, "File doesn't exist\n");
-        return;
+        return str;
     case -101:
         strcpy(str, "Directory doesn't exist\n");
-        return;
+        return str;
     case -102:
         strcpy(str, "The given file already exists\n");
-        return;
+        return str;
     case -103:
         strcpy(str, "-1\nExpression not found\n");
-        return;
+        return str;
     case -104:
         strcpy(str, "Invalid depth\n");
-        return;
+        return str;
     case -105:
         strcpy(str, "Invalid command\n");
-        return;
+        return str;
     case -106:
         strcpy(str, "File creation failed\n");
-        return;
+        return str;
+    case -107:
+        return "\0";
     }
     int digit, len = 0, n;
     n = num;
@@ -128,5 +131,6 @@ void itoa(char str[], int num){
         str[len - (i+1)] = digit + '0';
     }
     str[len] = '\0';
+    return str;
 }
 

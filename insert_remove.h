@@ -60,7 +60,7 @@ int insert(char *filepath, char *str, int line_no, int start_pos){
     FILE *file1 = fopen(filepath, "w");
     fprintf(file1, "%s",new_content);
     fclose(file1);
-    return 1;
+    return -107;
 }
 
 int removef(char *filepath, int line_no, int start_pos, int size){
@@ -97,7 +97,7 @@ int removef(char *filepath, int line_no, int start_pos, int size){
     FILE *file1 = fopen(filepath, "w");
     fprintf(file1, "%s",new_content);
     fclose(file1);
-    return 1;
+    return -107;
 }
 
 int removeb(char *filepath, int line_no, int start_pos, int size){
@@ -133,59 +133,61 @@ int removeb(char *filepath, int line_no, int start_pos, int size){
     FILE *file1 = fopen(filepath, "w");
     fprintf(file1, "%s",new_content);
     fclose(file1);
-    return 1;
+    return -107;
 }
 
-int cat(char* filepath){
+char* cat(char* filepath){
     filepath = path_validation(filepath);
     int r = existance_validation(filepath);
-    if(r != 1) return r;
+    char *r_str = (char*) malloc(sizeof(char) * MAX_FILE);
+    if(r != 1) return itoa(r);
+
     FILE * file = fopen(filepath, "r");
     char c = fgetc(file);
+    char *output = (char*) malloc(sizeof(char) * MAX_FILE);
     while(c != EOF){
-        printf("%c", c);
+        output[strlen(output)] = c;
         c = fgetc(file);
     }
-    printf("\n");
+    output[strlen(output)] = '\0';
     fclose(file);
-    return 1;
+    return output;
 }
 
-int run_cat(char *input){
+char* run_cat(char *input){
     char *filepath;
-    if(!get_input(input, &filepath, "\n", "--file ")) return -105;
-    int r = cat(filepath);  
-    return r;
+    if(!get_input(input, &filepath, "\n", "--file ")) return itoa(-105);
+    return cat(filepath);
 }
 
-int run_insert(char *input){
+char* run_insert(char *input){
     char *filepath, *str, *str_line, *str_start;
     int line_no;
     int start_pos;
-    if(!get_input(input, &filepath, " --str", "--file ")) return -105;
-    if(!get_input(input, &str, " --pos", "--str ")) return -105;
-    if(!get_input(input, &str_line, ":", "--pos ")) return -105;
-    if(!get_input(input, &str_start, "\n", ":")) return -105;
+    if(!get_input(input, &filepath, " --str", "--file ")) return itoa(-105);
+    if(!get_input(input, &str, " --pos", "--str ")) return itoa(-105);
+    if(!get_input(input, &str_line, ":", "--pos ")) return itoa(-105);
+    if(!get_input(input, &str_start, "\n", ":")) return itoa(-105);
     line_no = atoi(str_line);
     start_pos = atoi(str_start);
     int r = insert(filepath, str, line_no, start_pos);
-    return r;
+    return itoa(r);
 }
 
-int run_remove(char *input){
+char* run_remove(char *input){
     char *filepath, *line_str, *start_str, *size_str;
     int line_no, start_pos, size;
-    if(!get_input(input, &filepath, " --pos", "--file ")) return -105;
-    if(!get_input(input, &line_str, ":", "--pos ")) return -105;
-    if(!get_input(input, &start_str, " -size", ":")) return -105;
-    if(!get_input(input, &size_str, " -f\n", "-size ") && !get_input(input, &size_str, " -b\n", "-size ")) return -105;
+    if(!get_input(input, &filepath, " --pos", "--file ")) return itoa(-105);
+    if(!get_input(input, &line_str, ":", "--pos ")) return itoa(-105);
+    if(!get_input(input, &start_str, " -size", ":")) return itoa(-105);
+    if(!get_input(input, &size_str, " -f\n", "-size ") && !get_input(input, &size_str, " -b\n", "-size ")) return itoa(-105);
     char mode = input[strlen(input) - 2];
-    if(mode != 'f' && mode != 'b') return -105;
+    if(mode != 'f' && mode != 'b') return itoa(-105);
     line_no = atoi(line_str);
     start_pos = atoi(start_str);
     size = atoi(size_str);
     int r;
     if(mode == 'f') r = removef(filepath, line_no, start_pos, size);
     else if(mode == 'b') r = removeb(filepath, line_no, start_pos, size);
-    return r;
+    return itoa(r);
 }

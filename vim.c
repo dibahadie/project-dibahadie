@@ -30,9 +30,7 @@ int main(){
         fgets(input, MAX_SIZE, stdin);
         char* output = run_command(input);
         printf("%s", output);
-        // print_output(output);
         free(input);
-        free(output);
     }
 }
 
@@ -46,18 +44,16 @@ char* run_command(char *input){
 
     else if(!strcmp(initial_command, "createfile")){
         int r = run_create_file(input);
-        char* r_str = (char*) malloc(sizeof(char) * MAX_FILE);
-        itoa(r_str, r);
-        return r_str;
+        return itoa(r);
     }
 
     else if(!strcmp(initial_command, "cat")){
         return run_cat(input);
     }
 
-    // else if(!strcmp(initial_command, "insertstr")){
-    //     return run_insert(input);
-    // }
+    else if(!strcmp(initial_command, "insertstr")){
+        return run_insert(input);
+    }
 
     // else if(!strcmp(initial_command, "removestr")){
     //     return run_remove(input);
@@ -121,5 +117,6 @@ char* run_command(char *input){
     // }
 
     // return -105;
+    return "Nothing\n";
 }
 
