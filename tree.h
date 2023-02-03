@@ -18,7 +18,7 @@ char *tree(char* initialpath, int depth, int given_depth){
     DIR *dir = opendir(initialpath);
     if(!dir) return 0;
     while((dirpath = readdir(dir)) != NULL){
-        if(strcmp(dirpath->d_name, ".") != 0 && strcmp(dirpath->d_name, "..") != 0){
+        if(strcmp(dirpath->d_name, ".") != 0 && strcmp(dirpath->d_name, "..") != 0 && dirpath->d_name[0] != '.'){
             for(int i=0; i<depth; i++){
                 if(i % 2 == 0 || i == 0) tree_str[strlen(tree_str)] = '|';
                 else tree_str[strlen(tree_str)] = ' ';

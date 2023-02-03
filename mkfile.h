@@ -31,15 +31,43 @@ int create_dir(char *path){
     return result;
 }
 
+void backup_filepath(char *path, char newpath[MAX_FILE]){
+    char *ptr = strrchr(path, '/');
+    if(ptr == NULL){
+        newpath[0] = '.';
+        newpath[1] = '\0';
+        strcat(newpath, path);
+        return;
+    }
+    else{
+        for(int i=0; i<MAX_FILE; i++) newpath[i] = '\0';
+        ptr++;
+        strncpy(newpath, path, strlen(path) - strlen(ptr));
+        strcat(newpath, ".");
+        strcat(newpath, ptr);
+        return;
+    }
+}
+
 int create_file(char *path){
     path = path_validation(path);
+    char b_filepath[MAX_FILE];
     if(strchr(path, '/') == NULL){
-        FILE *file = fopen(path, "w");
+        FILE *file = fopen(path, "r");
+        
         if(file != NULL){
-            fclose(file);
-            return 1;
+            return file_already_exists;
         }else{
-            return 0;
+            file = fopen(path, "w");
+            backup_filepath(path, b_filepath);
+            FILE *b_file = fopen(b_filepath, "w");
+            
+            if(file == NULL) return file_creation_failed;
+            else{
+                fclose(file);
+                fclose(b_file);
+                return 1;
+            }
         }
     }else{
         char *filename = strrchr(path, '/');
@@ -51,10 +79,13 @@ int create_file(char *path){
         FILE *file = fopen(path, "r");
         if(file == NULL){
             file = fopen(path, "w");
+            backup_filepath(path, b_filepath);
+            FILE *b_file = fopen(b_filepath, "w");
             if(file == NULL){
                 return file_creation_failed;
             }
             fclose(file);
+            fclose(b_file);
             return 1;
         }
         else{

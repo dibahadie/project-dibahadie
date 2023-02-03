@@ -22,6 +22,7 @@ int get_command();
 
 int main(){
     mkdir("root", 0777);
+    mkdir("backup", 0777);
     while(1){
         int r = get_command();
         print_error(r);
@@ -103,6 +104,10 @@ int get_command(){
     else if(!strcmp(initial_command, "replace")){
         return run_replace(input);
     }
+
+    // else if(!strcmp(initial_command, "undo")){
+    //     return run_undo(input);
+    // }
 
     return -105;
 }
