@@ -17,11 +17,14 @@ int strlen_wild(char *str, char *to_be_found);
 int removef(char *filepath, int line_no, int start_pos, int size);
 int insert(char *filepath, char *str, int line_no, int start_pos);
 int find_count(char *filepath, char *str);
+void backup(char *filepath);
+
 
 int replace_at(char *filepath, char *initial_str, char *final_str, int n){
     filepath = path_validation(filepath);
     int r = existance_validation(filepath);
     if(r != 1) return r;
+    backup(filepath);
 
     FILE *file = fopen(filepath, "r");
     int index = find_at(filepath, initial_str, n);
@@ -52,6 +55,8 @@ int replace_all(char *filepath, char *initial_str, char *final_str){
     filepath = path_validation(filepath);
     int r = existance_validation(filepath);
     if(r != 1) return r;
+    backup(filepath);
+
     int count = find_count(filepath, initial_str);
     for(int i=0; i<count; i++){
         replace_at(filepath, initial_str, final_str, 1);

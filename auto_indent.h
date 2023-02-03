@@ -8,11 +8,13 @@
 #define MAX_FILE 10000
 
 char* path_validation(char initial[]);
+void backup(char *filepath);
 
 int auto_indent(char *filepath){
     filepath = path_validation(filepath);
     int r = existance_validation(filepath);
     if(r != 1) return r;
+    backup(filepath);
     
     int tab_counter = 0;
     FILE *file = fopen(filepath, "r");

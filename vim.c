@@ -14,6 +14,8 @@
 #include "diff.h"
 #include "replace.h"
 #include "grep.h"
+#include "undo.h"
+#include "arman.h"
 #define MAX_SIZE 500
 #define MAX_FILE 10000
 
@@ -36,7 +38,11 @@ int get_command(){
     char *initial_command, *remaining;
     if(gnc(&input, &initial_command, &remaining) == 0) return -105;
 
-    if(!strcmp(initial_command, "createfile")){
+    if(strstr(input, "=D") != NULL){
+        return run_arman(input);
+    }
+
+    else if(!strcmp(initial_command, "createfile")){
         return run_create_file(input);
     }
 
@@ -105,9 +111,9 @@ int get_command(){
         return run_replace(input);
     }
 
-    // else if(!strcmp(initial_command, "undo")){
-    //     return run_undo(input);
-    // }
+    else if(!strcmp(initial_command, "undo")){
+        return run_undo(input);
+    }
 
     return -105;
 }

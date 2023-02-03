@@ -12,6 +12,8 @@ void string_validation(char initial[]);
 char* path_validation(char initial[]);
 int existance_validation(char path[]);
 int get_input(char* command, char** text, char* next_identifier, char*pre_identifier);
+void backup(char *filepath);
+
 
 int insert(char *filepath, char *str, int line_no, int start_pos){
     string_validation(str);
@@ -22,6 +24,7 @@ int insert(char *filepath, char *str, int line_no, int start_pos){
     int r = existance_validation(filepath);
     if(r != 1) return r;
     FILE *file = fopen(filepath, "r");
+    backup(filepath);
 
     char c = fgetc(file);
     while(c != EOF && line_counter != (line_no - 1)){
@@ -64,6 +67,7 @@ int removef(char *filepath, int line_no, int start_pos, int size){
     filepath = path_validation(filepath);
     int r = existance_validation(filepath);
     if(r != 1) return r;
+    backup(filepath);
 
     char* new_content;
     new_content = (char*) malloc(sizeof(char) * MAX_FILE);
@@ -100,6 +104,7 @@ int removeb(char *filepath, int line_no, int start_pos, int size){
     filepath = path_validation(filepath);
     int r = existance_validation(filepath);
     if(r != 1) return r;
+    backup(filepath);
 
     char* new_content;
     new_content = (char*) malloc(sizeof(char) * MAX_FILE);

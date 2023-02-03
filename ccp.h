@@ -13,6 +13,8 @@ int removeb(char *filepath, int line_no, int start_pos, int size);
 char* path_validation(char initial[]);
 int existance_validation(char path[]);
 int get_input(char* command, char** text, char* next_identifier, char*pre_identifier);
+void backup(char *filepath);
+
 
 int copyb(char *filepath, int line_no, int start_pos, int size){
     filepath = path_validation(filepath);
@@ -76,7 +78,6 @@ int copyf(char *filepath, int line_no, int start_pos, int size){
     }
     fclose(file);
     copied_content[strlen(copied_content)] = '\0';
-    printf("%s", copied_content);
     char command[MAX_FILE] = "echo ";
     strcat(command, copied_content);
     strcat(command, " | pbcopy");
@@ -85,12 +86,14 @@ int copyf(char *filepath, int line_no, int start_pos, int size){
 }
 
 int cutf(char *filepath, int line_no, int start_pos, int size){
+    backup(filepath);
     copyf(filepath, line_no, start_pos, size);
     removef(filepath, line_no, start_pos, size);
     return 1;
 }
 
 int cutb(char *filepath, int line_no, int start_pos, int size){
+    backup(filepath);
     copyb(filepath, line_no, start_pos, size);
     removeb(filepath, line_no, start_pos, size);
     return 1;
@@ -100,6 +103,8 @@ int paste(char *filepath, int line_no, int start_pos){
     filepath = path_validation(filepath);
     int r = existance_validation(filepath);
     if(r != 1) return r;
+    backup(filepath);
+
     char *str;
     str = (char*) malloc(sizeof(char) * MAX_FILE);
     FILE *tmp = fopen("root/tmp.txt", "r");

@@ -38,10 +38,11 @@ int undo(char *filepath){
     }
     fclose(main_file);
     fclose(back_file);
+    return 1;
 }
 
 int run_undo(char *input){
     char* filepath = (char*) malloc(sizeof(char) * MAX_FILE);
     if(!get_input(input, &filepath, "\n", "--file ")) return -105;
-    return -105;
+    return undo(filepath);
 }
