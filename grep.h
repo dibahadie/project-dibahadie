@@ -26,34 +26,42 @@ void grep(char **files, char *str, int **lines, int n){
     }
 }
 
-void print_line(char *filepath, int line_number){
+char* get_line(char *filepath, int line_number){
+
     FILE *file = fopen(filepath, "r");
     char *line = (char*) malloc(sizeof(char) * MAX_FILE);
     for(int i=0; i<line_number; i++) fgets(line, MAX_FILE, file);
-    printf("%s", line);
     fclose(file);
+    return line; 
 }
 
-void print_grep(char **files, int **lines, int n){
+char* get_grep(char **files, int **lines, int n){
+    char *output = (char*) malloc(sizeof(char) * MAX_FILE);
     for(int i=0; i<n; i++){
         for(int j=0; j<MAX_FILE; j++){
             if(lines[i][j] == 1) {
-                printf("%s : ", files[i]);
-                print_line(files[i], j+1);
+                strcat(output, files[i]);
+                strcat(output, " : ");
+                strcat(output, get_line(files[i], j+1));
+                strcat(output, "\n");
             }
         }
     }
+    return output;
 }
 
-void print_names(char **files, int **lines, int n){
+char* get_names(char **files, int **lines, int n){
+    char *output = (char*) malloc(sizeof(char) * MAX_FILE);
     for(int i=0; i<n; i++){
         for(int j=0; j<MAX_FILE; j++){
             if(lines[i][j] == 1){
-                printf("%s\n", files[i]);
+                strcat(output, files[i]);
+                strcat(output, "\n");
                 break;
             }
         }
     }
+    return output;
 }
 
 int files_validation(char *files, char **files_list){
@@ -80,15 +88,22 @@ int files_validation(char *files, char **files_list){
     return counter;
 }
 
-int run_grep(char *input){
+char* run_grep(char *input){
     char *str = (char*) malloc(sizeof(char) * MAX_FILE);
-    if(!get_input(input, &str, " --file", "--str ")) return -105;
+    if(!get_input(input, &str, " --file", "--str ")) return itoa(-105);
     string_validation(str);
+
     char *files_str = (char*) malloc(sizeof(char) * MAX_FILE);
     char **files = (char**) malloc(sizeof(char*) * MAX_FILE);
     for(int i=0; i<MAX_FILE; i++) files[i] = (char*) malloc(sizeof(char) * MAX_FILE);
-    if(!get_input(input, &files_str, "\n", "--files ")) return -105;
+    if(!get_input(input, &files_str, "\n", "--files ")) return itoa(-105);
     int count = files_validation(files_str, files);
+    for(int i=0; i<count; i++){
+        files[i] = path_validation(files[i]);
+        int r = existance_validation(files[i]);
+        if(r != 1) return itoa(i);
+    }
+
     int **lines = (int**) malloc(sizeof(int*) * count);
     for(int i=0; i<count; i++) lines[i] = malloc(sizeof(int) * MAX_FILE);
     for(int i=0; i<count; i++){
@@ -105,8 +120,7 @@ int run_grep(char *input){
 
     if(c_ptr == NULL && l_ptr == NULL){
         grep(files, str, lines, count);
-        print_grep(files, lines, count);
-        return 1;
+        return get_grep(files, lines, count);
     }
     
     else if(c_ptr != NULL && l_ptr == NULL){
@@ -120,17 +134,15 @@ int run_grep(char *input){
                 }
             }
         }
-        printf("%d\n", c);
-        return 1;
+        return itoa(c);
     }
 
     else if(c_ptr == NULL && l_ptr != NULL){
         grep(files, str, lines, count);
-        print_names(files, lines, count);
-        return 1;
+        return get_names(files, lines, count);
     }
 
-    return -105;
+    return itoa(-105);
 }
 
 

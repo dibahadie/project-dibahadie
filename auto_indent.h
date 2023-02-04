@@ -13,7 +13,7 @@ void backup(char *filepath);
 int auto_indent(char *filepath){
     filepath = path_validation(filepath);
     int r = existance_validation(filepath);
-    if(r != 1) return r;
+    if(r != 1) return itoa(r);
     backup(filepath);
     
     int tab_counter = 0;
@@ -94,5 +94,11 @@ int auto_indent(char *filepath){
     FILE *file1 = fopen(filepath, "w");
     fprintf(file1, "%s" ,content);
     fclose(file1);
-    return 1;
+    return -107;
+}
+
+char *run_auto_indent(char *input){
+    char *filepath = (char*) malloc(sizeof(char) * MAX_FILE);
+    if(!get_input(input, &filepath, "\n", "--file ")) return itoa(-105);
+    return auto_indent(filepath);
 }

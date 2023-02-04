@@ -64,16 +64,13 @@ char* run_command(char *input){
         return run_find(input);
     }
 
-    // else if(!strcmp(initial_command, "grep")){
-    //     return run_grep(input);
-    // }
+    else if(!strcmp(initial_command, "grep")){
+        return run_grep(input);
+    }
 
-    // else if(!strcmp(initial_command, "auto-indent")){
-    //     char *filepath;
-    //     if(!get_input(input, &filepath, "\n", "--file ")) return -105;
-    //     auto_indent(filepath);
-    //     return 1;
-    // }
+    else if(!strcmp(initial_command, "auto-indent")){
+        return run_auto_indent(input);
+    }
 
     // else if(!strcmp(initial_command, "compare")){
     //     char *filepath1, *filepath2;
