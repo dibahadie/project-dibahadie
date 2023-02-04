@@ -30,6 +30,7 @@ int main(){
         fgets(input, MAX_SIZE, stdin);
         char* output = run_command(input);
         printf("%s", output);
+        if(output[strlen(output) - 1] != '\n') printf("\n");
         free(input);
     }
 }
@@ -55,15 +56,13 @@ char* run_command(char *input){
         return run_insert(input);
     }
 
-    // else if(!strcmp(initial_command, "removestr")){
-    //     return run_remove(input);
-    // }
+    else if(!strcmp(initial_command, "removestr")){
+        return run_remove(input);
+    }
     
-    // else if(!strcmp(initial_command, "find")){
-    //     int r = run_find(input);
-    //     if(r >= 0) printf("%d\n", r);
-    //     return r;
-    // }
+    else if(!strcmp(initial_command, "find")){
+        return run_find(input);
+    }
 
     // else if(!strcmp(initial_command, "grep")){
     //     return run_grep(input);
@@ -116,7 +115,6 @@ char* run_command(char *input){
     //     return run_undo(input);
     // }
 
-    // return -105;
-    return "Nothing\n";
+    return itoa(-105);
 }
 

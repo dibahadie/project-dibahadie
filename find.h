@@ -162,7 +162,7 @@ int find_at(char *filepath, char *str, int n){
         c = fgetc(file);
     }
     char *loc_ptr = strstr_wild(content, str);
-    if(loc_ptr == NULL) return -1;
+    if(loc_ptr == NULL) return -103;
     while(loc_ptr != NULL && counter != n){
         counter++;
         loc_ptr = strstr_wild(loc_ptr + 1, str);
@@ -182,6 +182,7 @@ int find_byword(char *filepath, char *str, int n){
     char c = fgetc(file);
     int word_counter = 1;
     int index = find_at(filepath, str, n);
+    if(index == -103) return -103;
     for(int i=0; i<index - 1; i++) {
         c = fgetc(file);
         if(c == ' ' || c == '\n') word_counter++;
@@ -189,40 +190,45 @@ int find_byword(char *filepath, char *str, int n){
     return word_counter;
     }
 
-int find_all(char *filepath, char *str){
+char* find_all(char *filepath, char *str){
     filepath = path_validation(filepath);
     int r = existance_validation(filepath);
-    if(r != 1) return r;
+    if(r != 1) return itoa(r);
     
+    char *output = (char*) malloc(sizeof(char) * MAX_FILE);
+    for(int i=0; i<MAX_FILE; i++) output[i] = '\0';
     int count = find_count(filepath, str);    
-    if(count == 0) return -103;
-    printf("%d", find_at(filepath, str, 1));
+    if(count == 0) return itoa(-103);
+    strcpy(output, itoa(find_at(filepath, str, 1)));
     for(int i=1; i<count; i++){
-        printf(", %d", find_at(filepath, str, i+1));
+        strcat(output, ", ");
+        strcat(output, itoa(find_at(filepath, str, i+1)));
     }
-    return 1;
+    return output;
 }
 
-int find_all_byword(char *filepath, char *str){
+char* find_all_byword(char *filepath, char *str){
     filepath = path_validation(filepath);
     int r = existance_validation(filepath);
-    if(r != 1) return r;
+    if(r != 1) return itoa(r);
 
+    char *output = (char*) malloc(sizeof(char) * MAX_FILE);
+    for(int i=0; i<MAX_FILE; i++) output[i] = '\0';
     int count = find_count(filepath, str);
-    if(count == 0) return -103;
+    if(count == 0) return itoa(-103);
     int word = find_byword(filepath, str, 1);
-    printf("%d", word);
+    strcpy(output, itoa(word));
     for(int i=1; i<count; i++){
-        word = find_byword(filepath, str, i+1);
-        printf(", %d", word);
+        strcat(output, ", ");
+        strcat(output, itoa(find_byword(filepath, str, i+1)));
     }
-    printf("\n");
-    return -1;
+    strcat(output, "\n");
+    return output;
 }
 
-int run_find(char *input){
+char* run_find(char *input){
     char *filepath, *str;
-    if(!get_input(input, &str, " --file", "--str ")) return -105;
+    if(!get_input(input, &str, " --file", "--str ")) return itoa(-105);
     string_validation(str);
 
     char *count_ptr = strstr(input, "-count");
@@ -232,45 +238,49 @@ int run_find(char *input){
 
     // no option
     if(count_ptr == NULL && all_ptr == NULL && byword_ptr == NULL && at_ptr == NULL){
-        if(!get_input(input, &filepath, "\n", "--file ")) return -105;
-        return find_first_index(filepath, str);
+        if(!get_input(input, &filepath, "\n", "--file ")) return itoa(-105);
+        int index = find_first_index(filepath, str);
+        return itoa(index);
     }
 
     // count option
     else if(all_ptr == NULL && byword_ptr == NULL && at_ptr == NULL){
-    if(!get_input(input, &filepath, " -count", "--file ")) return -105;
-        return find_count(filepath, str);
+    if(!get_input(input, &filepath, " -count", "--file ")) return itoa(-105);
+        int count = find_count(filepath, str);
+        return itoa(count);
     }
 
     // at option
     else if(count_ptr == NULL && all_ptr == NULL && byword_ptr == NULL){
         char *n_str;
         int n;
-        if(!get_input(input, &filepath, " -at", "--file ")) return -105;
-        if(!get_input(input, &n_str, "\n", "-at ")) return -105;
+        if(!get_input(input, &filepath, " -at", "--file ")) return itoa(-105);
+        if(!get_input(input, &n_str, "\n", "-at ")) return itoa(-105);
         n = atoi(n_str);
-        return find_at(filepath, str, n);
+        int index = find_at(filepath, str, n);
+        return itoa(index);
     }
 
     // byword option
     else if(count_ptr == NULL && all_ptr == NULL && at_ptr == NULL){
-        if(!get_input(input, &filepath, " -byword", "--file ")) return -105;
-        return find_byword(filepath, str, 1);
+        if(!get_input(input, &filepath, " -byword", "--file ")) return itoa(-103);
+        int word_count = find_byword(filepath, str, 1);
+        return itoa(word_count);
     }
 
     // all option
     else if(count_ptr == NULL && at_ptr == NULL && byword_ptr == NULL){
-        if(!get_input(input, &filepath, " -all", "--file ")) return -105;
+        if(!get_input(input, &filepath, " -all", "--file ")) return itoa(-103);
         return find_all(filepath, str);
     }
 
     // all byword options
     else if(count_ptr == NULL && at_ptr == NULL){
         if(all_ptr > byword_ptr){
-            if(!get_input(input, &filepath, " -byword", "--file ")) return -105;
+            if(!get_input(input, &filepath, " -byword", "--file ")) return itoa(-105);
         }
         else{
-            if(!get_input(input, &filepath, " -all", "--file ")) return -105;
+            if(!get_input(input, &filepath, " -all", "--file ")) return itoa(-105);
         }
         return find_all_byword(filepath, str);
     }
@@ -280,18 +290,19 @@ int run_find(char *input){
         char *n_str;
         int n;
         if(at_ptr > byword_ptr){
-            if(!get_input(input, &filepath, " -byword", "--file ")) return -105;
-            if(!get_input(input, &n_str, "\n", "-at ")) return -105;
+            if(!get_input(input, &filepath, " -byword", "--file ")) return itoa(-105);
+            if(!get_input(input, &n_str, "\n", "-at ")) return itoa(-105);
         }
         else{
-            if(!get_input(input, &filepath, " -at", "--file ")) return -105;
-            if(!get_input(input, &n_str, " -byword", "-at ")) return -105;
+            if(!get_input(input, &filepath, " -at", "--file ")) return itoa(-105);
+            if(!get_input(input, &n_str, " -byword", "-at ")) return itoa(-105);
         }
         n = atoi(n_str);
-        return find_byword(filepath, str, n);
+        int word_count = find_byword(filepath, str, n);
+        return itoa(word_count);
     }
     
-    return -105;
+    return itoa(-105);
     }
 
 int find_line_number_at(char *filepath, char *str, int n){
