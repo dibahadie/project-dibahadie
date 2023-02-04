@@ -27,6 +27,10 @@ void backup(char *filepath){
 }
 
 int undo(char *filepath){
+    filepath = path_validation(filepath);
+    int r = existance_validation(filepath);
+    if(r != 1) return r;
+
     char b_path[MAX_FILE];
     backup_filepath(filepath, b_path);
     FILE *main_file = fopen(filepath, "w");
@@ -38,11 +42,12 @@ int undo(char *filepath){
     }
     fclose(main_file);
     fclose(back_file);
-    return 1;
+    return -107;
 }
 
-int run_undo(char *input){
+char* run_undo(char *input){
     char* filepath = (char*) malloc(sizeof(char) * MAX_FILE);
-    if(!get_input(input, &filepath, "\n", "--file ")) return -105;
-    return undo(filepath);
+    if(!get_input(input, &filepath, "\n", "--file ")) return itoa(-105);
+    int r = undo(filepath);
+    return itoa(-107);
 }

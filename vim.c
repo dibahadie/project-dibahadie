@@ -39,9 +39,9 @@ char* run_command(char *input){
     char *initial_command, *remaining;
     if(gnc(&input, &initial_command, &remaining) == 0) return NULL;
 
-    // if(strstr(input, "=D") != NULL){
-    //     return run_arman(input);
-    // }
+    if(strstr(input, "=D") != NULL){
+        return run_arman(input);
+    }
 
     else if(!strcmp(initial_command, "createfile")){
         int r = run_create_file(input);
@@ -80,25 +80,25 @@ char* run_command(char *input){
         return run_tree(input);
     }
 
-    // else if(!strcmp(initial_command, "copystr")){
-    //     return run_copy(input);
-    // }
+    else if(!strcmp(initial_command, "copystr")){
+        return run_copy(input);
+    }
 
-    // else if(!strcmp(initial_command, "cutstr")){
-    //     return run_cut(input);
-    // }
+    else if(!strcmp(initial_command, "cutstr")){
+        return run_cut(input);
+    }
 
-    // else if(!strcmp(initial_command, "pastestr")){
-    //     return run_paste(input);
-    // }
+    else if(!strcmp(initial_command, "pastestr")){
+        return run_paste(input);
+    }
 
-    // else if(!strcmp(initial_command, "replace")){
-    //     return run_replace(input);
-    // }
+    else if(!strcmp(initial_command, "replace")){
+        return run_replace(input);
+    }
 
-    // else if(!strcmp(initial_command, "undo")){
-    //     return run_undo(input);
-    // }
+    else if(!strcmp(initial_command, "undo")){
+        return run_undo(input);
+    }
 
     return itoa(-105);
 }

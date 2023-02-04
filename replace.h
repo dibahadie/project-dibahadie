@@ -48,7 +48,7 @@ int replace_at(char *filepath, char *initial_str, char *final_str, int n){
     
     removef(filepath, line_counter, start_pos, strlen_wild(content, initial_str));
     insert(filepath, final_str, line_counter, start_pos);
-    return 1;
+    return -107;
 }
 
 int replace_all(char *filepath, char *initial_str, char *final_str){
@@ -61,7 +61,7 @@ int replace_all(char *filepath, char *initial_str, char *final_str){
     for(int i=0; i<count; i++){
         replace_at(filepath, initial_str, final_str, 1);
     }
-    return 1;
+    return -107;
 }
 
 int strlen_wild(char *str, char *to_be_found){
@@ -135,33 +135,35 @@ int strlen_wild(char *str, char *to_be_found){
     }
 }
 
-
-int run_replace(char *input){
+char *run_replace(char *input){
     char *filepath, *initial_str, *final_str;
     char *at_ptr, *all_ptr;
 
-    if(!get_input(input, &initial_str, " --str2", "--str1 ")) return -105;
-    if(!get_input(input, &final_str, " --file", "--str2 ")) return -105;
+    if(!get_input(input, &initial_str, " --str2", "--str1 ")) return itoa(-105);
+    if(!get_input(input, &final_str, " --file", "--str2 ")) return itoa(-105);
     string_validation(initial_str);
     string_validation(final_str);
     at_ptr = strstr(input, "-at");
     all_ptr = strstr(input, "-all");
 
     if(at_ptr == NULL && all_ptr == NULL){
-        if(!get_input(input, &filepath, "\n", "--file ")) return -105;
-        return replace_at(filepath, initial_str, final_str, 1);
+        if(!get_input(input, &filepath, "\n", "--file ")) return itoa(-105);
+        int r = replace_at(filepath, initial_str, final_str, 1);
+        return itoa(r);
     }
     else if(at_ptr == NULL && all_ptr != NULL){
-        if(!get_input(input, &filepath, " -all", "--file ")) return -105;
-        return replace_all(filepath, initial_str, final_str);
+        if(!get_input(input, &filepath, " -all", "--file ")) return itoa(-105);
+        int r = replace_all(filepath, initial_str, final_str);
+        return itoa(r);
     }
     else if(at_ptr != NULL && all_ptr == NULL){
         char *n_str = (char*) malloc(sizeof(char) * MAX_SIZE);
-        if(!get_input(input, &filepath, " -at", "--file ")) return -105;
-        if(!get_input(input, &n_str, "\n", "-at ")) return -105;
+        if(!get_input(input, &filepath, " -at", "--file ")) return itoa(-105);
+        if(!get_input(input, &n_str, "\n", "-at ")) return itoa(-105);
         int n = atoi(n_str);
-        return replace_at(filepath, initial_str, final_str, n);
+        int r = replace_at(filepath, initial_str, final_str, n);
+        return itoa(r);
     }
-    return -105;
+    return itoa(-105);
 }
 

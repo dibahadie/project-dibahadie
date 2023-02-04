@@ -14,11 +14,15 @@ int existance_validation(char path[]);
 int get_input(char* command, char** text, char* next_identifier, char*pre_identifier);
 void backup(char *filepath);
 
-int run_arman(char *input){
+char* run_arman(char *input){
     char *first_command = (char*) malloc(sizeof(char) * MAX_FILE);
+    char *input = (char*) malloc(sizeof(char) * MAX_FILE);
     char *second_command = (char*) malloc(sizeof(char) * MAX_FILE);
     second_command = strstr(input, "=D ") + 3;
     strncpy(first_command, input, strlen(input) - strlen(second_command) - 4);
     first_command[strlen(first_command)] = '\n';
-    return 1;
+    char* input = run_command(first_command);
+
+
+    return itoa(-107);
 }
