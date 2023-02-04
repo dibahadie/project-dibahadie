@@ -13,7 +13,7 @@ void backup(char *filepath);
 int auto_indent(char *filepath){
     filepath = path_validation(filepath);
     int r = existance_validation(filepath);
-    if(r != 1) return itoa(r);
+    if(r != 1) return r;
     backup(filepath);
     
     int tab_counter = 0;
@@ -100,5 +100,5 @@ int auto_indent(char *filepath){
 char *run_auto_indent(char *input){
     char *filepath = (char*) malloc(sizeof(char) * MAX_FILE);
     if(!get_input(input, &filepath, "\n", "--file ")) return itoa(-105);
-    return auto_indent(filepath);
+    return itoa(auto_indent(filepath));
 }

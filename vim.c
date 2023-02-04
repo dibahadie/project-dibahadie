@@ -72,25 +72,13 @@ char* run_command(char *input){
         return run_auto_indent(input);
     }
 
-    // else if(!strcmp(initial_command, "compare")){
-    //     char *filepath1, *filepath2;
-    //     if(!get_input(input, &filepath1, "\n", "compare ")) return -105;
-    //     filepath2 = strchr(filepath1 + 1, ' ');
-    //     filepath2 ++;
-    //     filepath1[strlen(filepath1) - 1 - strlen(filepath2)] = '\0';
-    //     printf("%s\n", filepath1);
-    //     diff(filepath1, filepath2);
-    //     return 1;
-    // }
+    else if(!strcmp(initial_command, "compare")){
+        return run_diff(input);
+    }
 
-    // else if(!strcmp(initial_command, "tree")){
-    //     char *depth_str;
-    //     int depth;
-    //     if(!get_input(input, &depth_str, "\n", "tree ")) return -105;
-    //     depth = atoi(depth_str);
-    //     printf("%s", tree("root", 0, depth));
-    //     return 1;
-    // }
+    else if(!strcmp(initial_command, "tree")){
+        return run_tree(input);
+    }
 
     // else if(!strcmp(initial_command, "copystr")){
     //     return run_copy(input);

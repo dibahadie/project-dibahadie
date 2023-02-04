@@ -11,7 +11,7 @@ char* path_validation(char initial[]);
 
 char *tree(char* initialpath, int depth, int given_depth){
     static char tree_str[MAX_FILE];
-    if(depth >= 2 * given_depth) return tree_str;
+    if(depth >= 2 * given_depth && given_depth != -1) return tree_str;
     char* path;
     path = (char*) malloc(sizeof(char) * MAX_FILE);
     struct dirent *dirpath;
@@ -35,4 +35,19 @@ char *tree(char* initialpath, int depth, int given_depth){
     }
     closedir(dir);
     return tree_str;
+}
+
+
+char *run_tree(char *input){
+    char *depth_str;
+    int depth;
+    if(!get_input(input, &depth_str, "\n", "tree ")) return itoa(-105);
+    if(strcmp(depth_str, "-1") == 0) {
+        depth = -1;
+        return tree("root", 0, -1);
+    }
+    else depth = atoi(depth_str);
+    if(depth < 0) return itoa(-104);
+    if(depth == 0) return "root";
+    return tree("root", 0, depth);
 }
